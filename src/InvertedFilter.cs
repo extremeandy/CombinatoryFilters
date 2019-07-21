@@ -18,8 +18,16 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform)
         {
-            var result = FilterToInvert.Match(combine, invert, transform);
-            return invert(result);
+            var innerFilter = FilterToInvert.Match(combine, invert, transform);
+            return invert(innerFilter);
+        }
+
+        public TResult Match<TResult>(
+            Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
+            Func<IInvertedFilter<TLeafNode>, TResult> invert,
+            Func<TLeafNode, TResult> transform)
+        {
+            return invert(this);
         }
 
         public IFilterNode<TResultLeafNode> Map<TResultLeafNode>(Func<TLeafNode, TResultLeafNode> mapFunc)

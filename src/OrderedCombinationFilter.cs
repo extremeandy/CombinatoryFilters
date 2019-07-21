@@ -25,10 +25,22 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters { get; }
 
-        public TResult Match<TResult>(Func<IEnumerable<TResult>, CombinationOperator, TResult> combine, Func<TResult, TResult> invert, Func<TLeafNode, TResult> transform)
+
+        public TResult Match<TResult>(
+            Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
+            Func<TResult, TResult> invert,
+            Func<TLeafNode, TResult> transform)
         {
             var innerResults = Filters.Select(f => f.Match(combine, invert, transform));
             return combine(innerResults, Operator);
+        }
+
+        public TResult Match<TResult>(
+            Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
+            Func<IInvertedFilter<TLeafNode>, TResult> invert,
+            Func<TLeafNode, TResult> transform)
+        {
+            return combine(this);
         }
 
         public IFilterNode<TResultLeafNode> Map<TResultLeafNode>(Func<TLeafNode, TResultLeafNode> mapFunc) where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>

@@ -11,7 +11,15 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<TResult, TResult> invert,
             Func<TThis, TResult> transform)
         {
-            return transform(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
+            return transform(this as TThis);
+        }
+
+        public TResult Match<TResult>(
+            Func<ICombinationFilterNode<TThis>, TResult> combine,
+            Func<IInvertedFilter<TThis>, TResult> invert,
+            Func<TThis, TResult> transform)
+        {
+            return transform(this as TThis);
         }
 
         public IFilterNode<TResultLeafNode> Map<TResultLeafNode>(
