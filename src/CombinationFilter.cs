@@ -51,22 +51,4 @@ namespace ExtremeAndy.CombinatoryFilters
             }
         }
     }
-
-    public abstract class CombinationFilter : CombinationFilterBase, ICombinationFilterNode
-    {
-        private readonly IImmutableSet<IFilterNode> _filters;
-
-        protected CombinationFilter(IEnumerable<IFilterNode> filters, CombinationOperator @operator = default)
-            : this(filters.ToImmutableHashSet(), @operator)
-        {
-        }
-
-        protected CombinationFilter(IImmutableSet<IFilterNode> filters, CombinationOperator @operator = default)
-            : base(filters, @operator)
-        {
-            _filters = filters;
-        }
-
-        
-    }
 }
