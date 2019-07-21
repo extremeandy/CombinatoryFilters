@@ -91,12 +91,9 @@ namespace ExtremeAndy.CombinatoryFilters
                     .Select(x => x.GetHashCode())
                     .OrderBy(x => x);
 
-                unchecked
-                {
-                    var hashCode = filterHashCodes.Aggregate(0, (acc, h) => (acc * 397) ^ h);
-                    hashCode = (hashCode * 397) ^ Operator.GetHashCode();
-                    return hashCode;
-                }
+                var hashCode = filterHashCodes.Aggregate(0, (acc, h) => (acc * 397) ^ h);
+                hashCode = (hashCode * 397) ^ Operator.GetHashCode();
+                return hashCode;
             }
         }
 
