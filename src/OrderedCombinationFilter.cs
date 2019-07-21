@@ -25,7 +25,6 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters { get; }
 
-
         public TResult Match<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
@@ -83,16 +82,9 @@ namespace ExtremeAndy.CombinatoryFilters
         {
             unchecked
             {
-                var filterHashCodes = Filters
-                    .Select(x => x.GetHashCode())
-                    .OrderBy(x => x);
-
-                unchecked
-                {
-                    var hashCode = filterHashCodes.Aggregate(0, (acc, h) => (acc * 397) ^ h);
-                    hashCode = (hashCode * 397) ^ Operator.GetHashCode();
-                    return hashCode;
-                }
+                var hashCode = Filters.Aggregate(0, (acc, f) => (acc * 397) ^ f.GetHashCode());
+                hashCode = (hashCode * 397) ^ Operator.GetHashCode();
+                return hashCode;
             }
         }
 
