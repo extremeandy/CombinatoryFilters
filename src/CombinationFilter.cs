@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -10,9 +9,11 @@ namespace ExtremeAndy.CombinatoryFilters
     /// then given <see cref="CombinationOperator"/>
     /// </summary>
     /// <typeparam name="TLeafNode"></typeparam>
-    public class CombinationFilter<TLeafNode> : CombinationFilter, ICombinationFilterNode<TLeafNode>
+    public class CombinationFilter<TLeafNode> : CombinationFilterBase<TLeafNode>
         where TLeafNode : class, ILeafFilterNode
     {
+        private readonly IImmutableSet<IFilterNode<TLeafNode>> _filters;
+
         public CombinationFilter(IEnumerable<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
             : this(filters.ToImmutableHashSet(), @operator)
         {
@@ -21,55 +22,8 @@ namespace ExtremeAndy.CombinatoryFilters
         public CombinationFilter(IImmutableSet<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
             : base(filters, @operator)
         {
-            Filters = filters;
-        }
-
-        public new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters { get; }
-
-        public TResult Match<TResult>(
-            Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
-            Func<TResult, TResult> invert,
-            Func<TLeafNode, TResult> transform)
-        {
-            var innerFilters = Filters.Select(f => f.Match(combine, invert, transform));
-            return combine(innerFilters, Operator);
-        }
-
-        public TResult Match<TResult>(
-            Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
-            Func<IInvertedFilter<TLeafNode>, TResult> invert,
-            Func<TLeafNode, TResult> transform)
-        {
-            return combine(this);
-        }
-
-        public IFilterNode<TResultLeafNode> Map<TResultLeafNode>(
-            Func<TLeafNode, TResultLeafNode> mapFunc)
-            where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>
-        {
-            var innerFilters = Filters.Select(f => f.Map(mapFunc));
-            return new CombinationFilter<TResultLeafNode>(innerFilters, Operator);
-        }
-    }
-
-    public abstract class CombinationFilter : InternalFilterNode, ICombinationFilterNode
-    {
-        private readonly IImmutableSet<IFilterNode> _filters;
-
-        protected CombinationFilter(IEnumerable<IFilterNode> filters, CombinationOperator @operator = default)
-            : this(filters.ToImmutableHashSet(), @operator)
-        {
-        }
-
-        protected CombinationFilter(IImmutableSet<IFilterNode> filters, CombinationOperator @operator = default)
-        {
             _filters = filters;
-            Operator = @operator;
         }
-
-        public IReadOnlyCollection<IFilterNode> Filters => _filters;
-
-        public CombinationOperator Operator { get; }
 
         public override bool Equals(IFilterNode other)
         {
@@ -78,7 +32,7 @@ namespace ExtremeAndy.CombinatoryFilters
                 return true;
             }
 
-            return other is ICombinationFilterNode combinationOther
+            return other is ICombinationFilterNode<TLeafNode> combinationOther
                    && _filters.SetEquals(combinationOther.Filters)
                    && Operator == combinationOther.Operator;
         }
@@ -96,11 +50,23 @@ namespace ExtremeAndy.CombinatoryFilters
                 return hashCode;
             }
         }
+    }
 
-        public override string ToString()
+    public abstract class CombinationFilter : CombinationFilterBase, ICombinationFilterNode
+    {
+        private readonly IImmutableSet<IFilterNode> _filters;
+
+        protected CombinationFilter(IEnumerable<IFilterNode> filters, CombinationOperator @operator = default)
+            : this(filters.ToImmutableHashSet(), @operator)
         {
-            var delimeter = Operator.Match(() => " AND ", () => " OR ");
-            return string.Join(delimeter, Filters.Select(f => $"({f})"));
         }
+
+        protected CombinationFilter(IImmutableSet<IFilterNode> filters, CombinationOperator @operator = default)
+            : base(filters, @operator)
+        {
+            _filters = filters;
+        }
+
+        
     }
 }
