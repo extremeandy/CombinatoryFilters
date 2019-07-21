@@ -91,5 +91,11 @@ namespace ExtremeAndy.CombinatoryFilters
                 }
             }
         }
+
+        public override string ToString()
+        {
+            var delimeter = Operator.Match(() => " AND ", () => " OR ");
+            return string.Join(delimeter, Filters.Select(f => $"({f})"));
+        }
     }
 }
