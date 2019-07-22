@@ -45,6 +45,11 @@ namespace ExtremeAndy.CombinatoryFilters
             var innerFilters = Filters.Select(f => f.Map(mapFunc));
             return new CombinationFilter<TResultLeafNode>(innerFilters, Operator);
         }
+
+        public bool Any(Func<TLeafNode, bool> predicate)
+        {
+            return Filters.Any(f => f.Any(predicate));
+        }
     }
 
     public abstract class CombinationFilterBase : InternalFilterNode, ICombinationFilterNode

@@ -36,6 +36,11 @@ namespace ExtremeAndy.CombinatoryFilters
             var innerResult = FilterToInvert.Map(mapFunc);
             return new InvertedFilter<TResultLeafNode>(innerResult);
         }
+
+        public bool Any(Func<TLeafNode, bool> predicate)
+        {
+            return FilterToInvert.Any(predicate);
+        }
     }
 
     public abstract class InvertedFilter : InternalFilterNode, IInvertedFilter

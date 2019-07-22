@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace ExtremeAndy.CombinatoryFilters
 {
@@ -11,7 +12,7 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<TResult, TResult> invert,
             Func<TThis, TResult> transform)
         {
-            return transform(this as TThis);
+            return transform(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
         }
 
         public TResult Match<TResult>(
@@ -19,13 +20,18 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<IInvertedFilter<TThis>, TResult> invert,
             Func<TThis, TResult> transform)
         {
-            return transform(this as TThis);
+            return transform(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
         }
 
         public IFilterNode<TResultLeafNode> Map<TResultLeafNode>(
             Func<TThis, TResultLeafNode> mapFunc) where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>
         {
-            return mapFunc(this as TThis);  // Hack to work around c# not supporting higher-order polymorphism
+            return mapFunc(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
+        }
+
+        public bool Any(Func<TThis, bool> predicate)
+        {
+            return predicate(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
         }
     }
 }

@@ -20,6 +20,8 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public abstract IFilterNode<TResultLeafNode> Map<TResultLeafNode>(Func<TLeafNode, TResultLeafNode> mapFunc)
             where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>;
+
+        public abstract bool Any(Func<TLeafNode, bool> predicate);
     }
 
     public abstract class FilterNode : IFilterNode
