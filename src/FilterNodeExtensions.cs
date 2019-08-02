@@ -65,9 +65,20 @@ namespace ExtremeAndy.CombinatoryFilters
                                 : collapsedCombinationFilter;
                         });
                 },
-                invertedFilter => invertedFilter.FilterToInvert is IInvertedFilter<TLeafNode> invertedInner
-                    ? invertedInner.FilterToInvert
-                    : invertedFilter,
+                invertedFilter =>
+                {
+                    if (invertedFilter.FilterToInvert is ICombinationFilterNode<TLeafNode> combinationInner && combinationInner.Filters.Count == 0)
+                    {
+                        var invertedCombinationOperation = combinationInner.Operator.Match(
+                            () => CombinationOperator.Any, 
+                            () => CombinationOperator.All);
+                        return new CombinationFilter<TLeafNode>(new IFilterNode<TLeafNode>[0], invertedCombinationOperation);
+                    }
+
+                    return invertedFilter.FilterToInvert is IInvertedFilter<TLeafNode> invertedInner
+                        ? invertedInner.FilterToInvert
+                        : invertedFilter;
+                },
                 leafFilter => (IFilterNode<TLeafNode>)leafFilter); // TODO: Figure out a way to remove this evil cast?
         }
 
