@@ -24,6 +24,40 @@ namespace ExtremeAndy.CombinatoryFilters
                 itemPredicate);
         }
 
+        /// <summary>
+        /// Removes redundancies in a filter to give simplest expression
+        /// </summary>
+        /// <typeparam name="TLeafNode"></typeparam>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public static IFilterNode<TLeafNode> Collapse<TLeafNode>(this IFilterNode<TLeafNode> filter)
+            where TLeafNode : class, ILeafFilterNode
+        {
+            return filter.Match(
+                combinationFilter =>
+                {
+                    return combinationFilter.Operator.Match(
+                        () =>
+                        {
+                            var nonEmptyFilters = combinationFilter.Filters.Where(f => !f.Equals(FilterNode<TLeafNode>.Empty));
+                            var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonEmptyFilters, combinationFilter.Operator);
+                            return collapsedCombinationFilter.Filters.Count == 1
+                                ? collapsedCombinationFilter.Filters.Single()
+                                : collapsedCombinationFilter;
+                        },
+                        () =>
+                        {
+                            return combinationFilter.Filters.Any(f => f.Equals(FilterNode<TLeafNode>.Empty))
+                                ? FilterNode<TLeafNode>.Empty
+                                : combinationFilter;
+                        });
+                },
+                invertedFilter => invertedFilter.FilterToInvert is IInvertedFilter<TLeafNode> invertedInner
+                    ? invertedInner.FilterToInvert
+                    : invertedFilter,
+                leafFilter => (IFilterNode<TLeafNode>)leafFilter); // TODO: Figure out a way to remove this evil cast?
+        }
+
         internal static Func<TItemToTest, bool> Combine<TItemToTest>(
             IEnumerable<Func<TItemToTest, bool>> innerResults,
             CombinationOperator @operator)
