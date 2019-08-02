@@ -10,7 +10,7 @@ namespace ExtremeAndy.CombinatoryFilters
     }
 
     public interface ICombinationFilterNode<out TLeafNode> : IInternalFilterNode<TLeafNode>, ICombinationFilterNode
-        where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
+        where TLeafNode : class, ILeafFilterNode
     {
         new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters { get; }
     }

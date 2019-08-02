@@ -6,7 +6,7 @@
     }
 
     public interface IInvertedFilter<out TLeafNode> : IInternalFilterNode<TLeafNode>, IInvertedFilter
-        where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
+        where TLeafNode : class, ILeafFilterNode
     {
         new IFilterNode<TLeafNode> FilterToInvert { get; }
     }

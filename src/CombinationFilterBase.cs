@@ -11,7 +11,7 @@ namespace ExtremeAndy.CombinatoryFilters
     /// </summary>
     /// <typeparam name="TLeafNode"></typeparam>
     public abstract class CombinationFilterBase<TLeafNode> : CombinationFilterBase, ICombinationFilterNode<TLeafNode>
-        where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
+        where TLeafNode : class, ILeafFilterNode
     {
         protected CombinationFilterBase(IReadOnlyCollection<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
             : base(filters, @operator)

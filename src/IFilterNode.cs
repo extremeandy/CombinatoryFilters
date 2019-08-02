@@ -8,7 +8,7 @@ namespace ExtremeAndy.CombinatoryFilters
     }
 
     public interface IFilterNode<out TLeafNode> : IFilterNode
-        where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
+        where TLeafNode : class, ILeafFilterNode
     {
         TResult Aggregate<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
