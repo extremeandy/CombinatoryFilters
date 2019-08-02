@@ -8,7 +8,7 @@ namespace ExtremeAndy.CombinatoryFilters
     {
         public static OrderedCombinationFilter<TLeafNode> Empty = new OrderedCombinationFilter<TLeafNode>(new IFilterNode<TLeafNode>[0], CombinationOperator.And);
 
-        public abstract TResult Match<TResult>(
+        public abstract TResult Aggregate<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform);

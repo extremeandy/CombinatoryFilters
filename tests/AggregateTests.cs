@@ -3,10 +3,10 @@ using Xunit;
 
 namespace ExtremeAndy.CombinatoryFilters.Tests
 {
-    public class MatchTests
+    public class AggregateTests
     {
         [Fact]
-        public void Match_ReturnsExpectedResult_WhenComputingLengthOfLongestInterval()
+        public void Aggregate_ReturnsExpectedResult_WhenComputingLengthOfLongestInterval()
         {
             var filter5To10 = new NumericRangeFilter(5, 10);
             var filter8To15 = new NumericRangeFilter(8, 15);
@@ -15,7 +15,7 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
             var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[] { filter5To10Or8To15, filter9To12 }, CombinationOperator.And);
 
             // Reduce the filter to get the length of the longest interval
-            var result = filter.Match<double>(
+            var result = filter.Aggregate<double>(
                 (lengths, _) => lengths.Max(), 
                 length => double.PositiveInfinity,
                 f => f.UpperBound - f.LowerBound);
@@ -25,7 +25,7 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
         }
 
         [Fact]
-        public void Match_ReturnsExpectedResult_WhenComputingMinimumLowerBound()
+        public void Aggregate_ReturnsExpectedResult_WhenComputingMinimumLowerBound()
         {
             var filter5To10 = new NumericRangeFilter(5, 10);
             var filter = filter5To10.Invert();
@@ -36,7 +36,7 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
             }
 
             // Reduce the filter to get the length of the longest interval
-            var result = filter.Match(
+            var result = filter.Aggregate(
                 (lowerBounds, _) => lowerBounds.Min(),
                 length => double.NegativeInfinity,
                 GetLowerBound);

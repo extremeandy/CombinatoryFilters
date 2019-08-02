@@ -13,12 +13,12 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public new IFilterNode<TLeafNode> FilterToInvert { get; }
 
-        public TResult Match<TResult>(
+        public TResult Aggregate<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform)
         {
-            var innerFilter = FilterToInvert.Match(combine, invert, transform);
+            var innerFilter = FilterToInvert.Aggregate(combine, invert, transform);
             return invert(innerFilter);
         }
 

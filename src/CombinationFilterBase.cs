@@ -21,12 +21,12 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters { get; }
 
-        public TResult Match<TResult>(
+        public TResult Aggregate<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform)
         {
-            var innerFilters = Filters.Select(f => f.Match(combine, invert, transform));
+            var innerFilters = Filters.Select(f => f.Aggregate(combine, invert, transform));
             return combine(innerFilters, Operator);
         }
 

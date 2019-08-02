@@ -75,7 +75,7 @@ var isMatch = filter.IsMatch(7);
 
 ## Advanced usage
 
-`IFilterNode<>` supports `Map` and `Match` for mapping and reducing filters.
+`IFilterNode<>` supports `Map`, `Match` and `Aggregate` for mapping and reducing filters. 
 
 ### `Map` usage
 
@@ -90,12 +90,12 @@ var shortenedFilters = filter.Map(f =>
 });
 ```
 
-### `Match` usage
+### `Aggregate` usage
 
 In this example, we want to compute the length of the longest filter interval, or infinity if any filter is inverted.
 
 ```csharp
-var longestIntervalLength = filter.Match<double>(
+var longestIntervalLength = filter.Aggregate<double>(
     (lengths, _) => lengths.Max(),
     length => double.PositiveInfinity,
     f => f.UpperBound - f.LowerBound);

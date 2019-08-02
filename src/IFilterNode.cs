@@ -10,7 +10,7 @@ namespace ExtremeAndy.CombinatoryFilters
     public interface IFilterNode<out TLeafNode> : IFilterNode
         where TLeafNode : class, ILeafFilterNode
     {
-        TResult Match<TResult>(
+        TResult Aggregate<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform);

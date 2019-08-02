@@ -7,7 +7,7 @@ namespace ExtremeAndy.CombinatoryFilters
     public abstract class LeafFilterNode<TThis> : FilterNode, ILeafFilterNode<TThis>
         where TThis : class, ILeafFilterNode<TThis>
     {
-        public TResult Match<TResult>(
+        public TResult Aggregate<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TThis, TResult> transform)

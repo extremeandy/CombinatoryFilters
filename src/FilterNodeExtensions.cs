@@ -18,7 +18,7 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<TLeafNode, Func<TItemToTest, bool>> itemPredicate)
             where TLeafNode : class, ILeafFilterNode
         {
-            return filter.Match(
+            return filter.Aggregate(
                 Combine,
                 Invert,
                 itemPredicate);
