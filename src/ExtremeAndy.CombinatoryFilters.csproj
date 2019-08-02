@@ -9,10 +9,10 @@
     <Authors>Andrew Harward</Authors>
     <Description>Monad-like abstraction for creating, applying, mapping, and reducing combinatory filter trees</Description>
     <Copyright>Copyright 2019 (c) Andrew Harward. All rights reserved.</Copyright>
-    <RepositoryUrl>https://github.com/extremeandy/ExtremeAndy.CombinatoryFilters</RepositoryUrl>
+    <RepositoryUrl>https://github.com/extremeandy/CombinatoryFilters</RepositoryUrl>
     <PackageTags>monad filter tree combinatory boolean map reduce</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/extremeandy/ExtremeAndy.CombinatoryFilters</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/extremeandy/CombinatoryFilters</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
