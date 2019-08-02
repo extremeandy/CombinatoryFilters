@@ -6,7 +6,7 @@ namespace ExtremeAndy.CombinatoryFilters
     public abstract class FilterNode<TLeafNode> : FilterNode, IFilterNode<TLeafNode>
         where TLeafNode : class, ILeafFilterNode
     {
-        public static OrderedCombinationFilter<TLeafNode> Empty = new OrderedCombinationFilter<TLeafNode>(new IFilterNode<TLeafNode>[0], CombinationOperator.And);
+        public static OrderedCombinationFilter<TLeafNode> Empty = new OrderedCombinationFilter<TLeafNode>(new IFilterNode<TLeafNode>[0], CombinationOperator.All);
 
         public abstract TResult Aggregate<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,

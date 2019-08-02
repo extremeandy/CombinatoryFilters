@@ -71,6 +71,11 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public override string ToString()
         {
+            if (Filters.Count == 0)
+            {
+                return Operator.Match(() => "TRUE", () => "FALSE");
+            }
+
             var delimeter = Operator.Match(() => " AND ", () => " OR ");
             return string.Join(delimeter, Filters.Select(f => $"({f})"));
         }

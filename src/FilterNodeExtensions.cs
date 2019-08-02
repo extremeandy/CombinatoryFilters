@@ -33,12 +33,18 @@ namespace ExtremeAndy.CombinatoryFilters
         public static IFilterNode<TLeafNode> Collapse<TLeafNode>(this IFilterNode<TLeafNode> filter)
             where TLeafNode : class, ILeafFilterNode
         {
+            var invertedEmptyFilter = new InvertedFilter<TLeafNode>(FilterNode<TLeafNode>.Empty);
             return filter.Match(
                 combinationFilter =>
                 {
                     return combinationFilter.Operator.Match(
                         () =>
                         {
+                            if (combinationFilter.Filters.Any(f => f.Equals(invertedEmptyFilter)))
+                            {
+                                return FilterNode<TLeafNode>.Empty;
+                            }
+
                             var nonEmptyFilters = combinationFilter.Filters.Where(f => !f.Equals(FilterNode<TLeafNode>.Empty));
                             var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonEmptyFilters, combinationFilter.Operator);
                             return collapsedCombinationFilter.Filters.Count == 1
@@ -47,9 +53,16 @@ namespace ExtremeAndy.CombinatoryFilters
                         },
                         () =>
                         {
-                            return combinationFilter.Filters.Any(f => f.Equals(FilterNode<TLeafNode>.Empty))
-                                ? FilterNode<TLeafNode>.Empty
-                                : combinationFilter;
+                            if (combinationFilter.Filters.Any(f => f.Equals(FilterNode<TLeafNode>.Empty)))
+                            {
+                                return FilterNode<TLeafNode>.Empty;
+                            }
+
+                            var nonInvertedEmptyFilters = combinationFilter.Filters.Where(f => !f.Equals(invertedEmptyFilter));
+                            var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonInvertedEmptyFilters, combinationFilter.Operator);
+                            return collapsedCombinationFilter.Filters.Count == 1
+                                ? collapsedCombinationFilter.Filters.Single()
+                                : collapsedCombinationFilter;
                         });
                 },
                 invertedFilter => invertedFilter.FilterToInvert is IInvertedFilter<TLeafNode> invertedInner
@@ -62,13 +75,13 @@ namespace ExtremeAndy.CombinatoryFilters
             IEnumerable<Func<TItemToTest, bool>> innerResults,
             CombinationOperator @operator)
         {
-            Func<TItemToTest, bool> AndReducer()
+            Func<TItemToTest, bool> AllReducer()
                 => relatedItemCollection => innerResults.All(comparator => comparator(relatedItemCollection));
 
-            Func<TItemToTest, bool> OrReducer()
+            Func<TItemToTest, bool> AnyReducer()
                 => relatedItemCollection => innerResults.Any(comparator => comparator(relatedItemCollection));
 
-            return @operator.Match(AndReducer, OrReducer);
+            return @operator.Match(AllReducer, AnyReducer);
         }
 
         internal static Func<TItemToTest, bool> Invert<TItemToTest>(Func<TItemToTest, bool> innerResult)
