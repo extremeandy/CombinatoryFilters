@@ -10,7 +10,7 @@ namespace ExtremeAndy.CombinatoryFilters
     /// </summary>
     /// <typeparam name="TLeafNode"></typeparam>
     public class CombinationFilter<TLeafNode> : CombinationFilterBase<TLeafNode>
-        where TLeafNode : class, ILeafFilterNode
+        where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
     {
         private readonly IImmutableSet<IFilterNode<TLeafNode>> _filters;
 

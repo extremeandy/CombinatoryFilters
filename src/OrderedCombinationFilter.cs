@@ -10,7 +10,7 @@ namespace ExtremeAndy.CombinatoryFilters
     /// </summary>
     /// <typeparam name="TLeafNode"></typeparam>
     public class OrderedCombinationFilter<TLeafNode> : CombinationFilterBase<TLeafNode>, ICombinationFilterNode<TLeafNode>
-        where TLeafNode : class, ILeafFilterNode
+        where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
     {
         public OrderedCombinationFilter(IEnumerable<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
             : this(filters.ToList(), @operator)

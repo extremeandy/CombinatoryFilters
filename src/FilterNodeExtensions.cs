@@ -7,7 +7,7 @@ namespace ExtremeAndy.CombinatoryFilters
     public static class FilterNodeExtensions
     {
         public static InvertedFilter<TLeafNode> Invert<TLeafNode>(this IFilterNode<TLeafNode> filter)
-            where TLeafNode : class, ILeafFilterNode
+            where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
         {
             return new InvertedFilter<TLeafNode>(filter);
         }
@@ -16,7 +16,7 @@ namespace ExtremeAndy.CombinatoryFilters
         public static Func<TItemToTest, bool> GetPredicate<TLeafNode, TItemToTest>(
             this IFilterNode<TLeafNode> filter,
             Func<TLeafNode, Func<TItemToTest, bool>> itemPredicate)
-            where TLeafNode : class, ILeafFilterNode
+            where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
         {
             return filter.Aggregate(
                 Combine,
@@ -31,7 +31,7 @@ namespace ExtremeAndy.CombinatoryFilters
         /// <param name="filter"></param>
         /// <returns></returns>
         public static IFilterNode<TLeafNode> Collapse<TLeafNode>(this IFilterNode<TLeafNode> filter)
-            where TLeafNode : class, ILeafFilterNode
+            where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
         {
             return filter.Match(
                 combinationFilter =>
@@ -55,7 +55,7 @@ namespace ExtremeAndy.CombinatoryFilters
                 invertedFilter => invertedFilter.FilterToInvert is IInvertedFilter<TLeafNode> invertedInner
                     ? invertedInner.FilterToInvert
                     : invertedFilter,
-                leafFilter => (IFilterNode<TLeafNode>)leafFilter); // TODO: Figure out a way to remove this evil cast?
+                leafFilter => leafFilter);
         }
 
         internal static Func<TItemToTest, bool> Combine<TItemToTest>(

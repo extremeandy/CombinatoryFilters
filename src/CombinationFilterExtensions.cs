@@ -9,7 +9,7 @@ namespace ExtremeAndy.CombinatoryFilters
             this ICombinationFilterNode<TLeafNode> source,
             Func<IEnumerable<IFilterNode<TLeafNode>>, TResult> andReducer,
             Func<IEnumerable<IFilterNode<TLeafNode>>, TResult> orReducer)
-            where TLeafNode : class, ILeafFilterNode
+            where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
         {
             return source.Filters
                 .Match(andReducer, orReducer, source.Operator);

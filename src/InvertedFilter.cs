@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace ExtremeAndy.CombinatoryFilters
 {
     public class InvertedFilter<TLeafNode> : InvertedFilter, IInvertedFilter<TLeafNode>
-        where TLeafNode : class, ILeafFilterNode
+        where TLeafNode : class, ILeafFilterNode, IFilterNode<TLeafNode>
     {
         public InvertedFilter(IFilterNode<TLeafNode> filterToInvert) : base(filterToInvert)
         {
