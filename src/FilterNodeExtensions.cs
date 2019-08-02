@@ -33,33 +33,32 @@ namespace ExtremeAndy.CombinatoryFilters
         public static IFilterNode<TLeafNode> Collapse<TLeafNode>(this IFilterNode<TLeafNode> filter)
             where TLeafNode : class, ILeafFilterNode
         {
-            var invertedEmptyFilter = new InvertedFilter<TLeafNode>(FilterNode<TLeafNode>.Empty);
             return filter.Match(
                 combinationFilter =>
                 {
                     return combinationFilter.Operator.Match(
                         () =>
                         {
-                            if (combinationFilter.Filters.Any(f => f.Equals(invertedEmptyFilter)))
+                            if (combinationFilter.Filters.Any(f => f.Equals(FilterNode<TLeafNode>.False)))
                             {
-                                return FilterNode<TLeafNode>.Empty;
+                                return FilterNode<TLeafNode>.False;
                             }
 
-                            var nonEmptyFilters = combinationFilter.Filters.Where(f => !f.Equals(FilterNode<TLeafNode>.Empty));
-                            var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonEmptyFilters, combinationFilter.Operator);
+                            var nonTrivialFilters = combinationFilter.Filters.Where(f => !f.Equals(FilterNode<TLeafNode>.True));
+                            var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, combinationFilter.Operator);
                             return collapsedCombinationFilter.Filters.Count == 1
                                 ? collapsedCombinationFilter.Filters.Single()
                                 : collapsedCombinationFilter;
                         },
                         () =>
                         {
-                            if (combinationFilter.Filters.Any(f => f.Equals(FilterNode<TLeafNode>.Empty)))
+                            if (combinationFilter.Filters.Any(f => f.Equals(FilterNode<TLeafNode>.True)))
                             {
-                                return FilterNode<TLeafNode>.Empty;
+                                return FilterNode<TLeafNode>.True;
                             }
 
-                            var nonInvertedEmptyFilters = combinationFilter.Filters.Where(f => !f.Equals(invertedEmptyFilter));
-                            var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonInvertedEmptyFilters, combinationFilter.Operator);
+                            var nonTrivialFilters = combinationFilter.Filters.Where(f => !f.Equals(FilterNode<TLeafNode>.False));
+                            var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, combinationFilter.Operator);
                             return collapsedCombinationFilter.Filters.Count == 1
                                 ? collapsedCombinationFilter.Filters.Single()
                                 : collapsedCombinationFilter;
