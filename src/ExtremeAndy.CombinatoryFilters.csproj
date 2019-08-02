@@ -13,6 +13,7 @@
     <PackageTags>functional filter tree combinatory boolean map reduce</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/extremeandy/CombinatoryFilters</PackageProjectUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
