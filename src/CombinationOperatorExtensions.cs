@@ -6,12 +6,12 @@ namespace ExtremeAndy.CombinatoryFilters
     {
         public static TResult Match<TResult>(
             this CombinationOperator @operator,
-            Func<TResult> andPredicate,
-            Func<TResult> orPredicate)
+            Func<TResult> allPredicate,
+            Func<TResult> anyPredicate)
         {
-            return @operator == CombinationOperator.And
-                ? andPredicate()
-                : orPredicate();
+            return @operator == CombinationOperator.All
+                ? allPredicate()
+                : anyPredicate();
         }
     }
 }

@@ -7,23 +7,23 @@ namespace ExtremeAndy.CombinatoryFilters
     {
         public static TResult Match<TResult, TLeafNode>(
             this ICombinationFilterNode<TLeafNode> source,
-            Func<IEnumerable<IFilterNode<TLeafNode>>, TResult> andReducer,
-            Func<IEnumerable<IFilterNode<TLeafNode>>, TResult> orReducer)
+            Func<IEnumerable<IFilterNode<TLeafNode>>, TResult> allReducer,
+            Func<IEnumerable<IFilterNode<TLeafNode>>, TResult> anyReducer)
             where TLeafNode : class, ILeafFilterNode
         {
             return source.Filters
-                .Match(andReducer, orReducer, source.Operator);
+                .Match(allReducer, anyReducer, source.Operator);
         }
 
         public static TResult Match<TSource, TResult>(
             this IEnumerable<TSource> source,
-            Func<IEnumerable<TSource>, TResult> andReducer,
-            Func<IEnumerable<TSource>, TResult> orReducer,
+            Func<IEnumerable<TSource>, TResult> allReducer,
+            Func<IEnumerable<TSource>, TResult> anyReducer,
             CombinationOperator @operator = default)
         {
             return @operator.Match(
-                () => andReducer(source), 
-                () => orReducer(source));
+                () => allReducer(source), 
+                () => anyReducer(source));
         }
     }
 }

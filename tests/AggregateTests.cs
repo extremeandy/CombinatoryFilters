@@ -10,9 +10,9 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
         {
             var filter5To10 = new NumericRangeFilter(5, 10);
             var filter8To15 = new NumericRangeFilter(8, 15);
-            var filter5To10Or8To15 = new CombinationFilter<NumericRangeFilter>(new[] { filter5To10, filter8To15 }, CombinationOperator.Or);
+            var filter5To10Or8To15 = new CombinationFilter<NumericRangeFilter>(new[] { filter5To10, filter8To15 }, CombinationOperator.Any);
             var filter9To12 = new NumericRangeFilter(9, 12);
-            var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[] { filter5To10Or8To15, filter9To12 }, CombinationOperator.And);
+            var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[] { filter5To10Or8To15, filter9To12 }, CombinationOperator.All);
 
             // Reduce the filter to get the length of the longest interval
             var result = filter.Aggregate<double>(

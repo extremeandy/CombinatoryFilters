@@ -51,9 +51,9 @@ You can assemble arbitrarily complex filters as follows:
 ```csharp
 var filter5To10 = new NumericRangeFilter(5, 10);
 var filter8To15 = new NumericRangeFilter(8, 15);
-var filter5To10Or8To15 = new CombinationFilter<NumericRangeFilter>(new[] { filter5To10, filter8To15 }, CombinationOperator.Or);
+var filter5To10Or8To15 = new CombinationFilter<NumericRangeFilter>(new[] { filter5To10, filter8To15 }, CombinationOperator.Any);
 var filter9To12 = new NumericRangeFilter(9, 12);
-var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[] { filter5To10Or8To15, filter9To12 }, CombinationOperator.And);
+var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[] { filter5To10Or8To15, filter9To12 }, CombinationOperator.All);
 ```
 
 #### Inversion
@@ -79,7 +79,7 @@ var isMatch = filter.IsMatch(7);
 
 ### `Map` usage
 
-In this example, we reduce the range of the leaf node filters by increasing the lower bound by `1` and decreasing the upper bound by `1`. The structure of all the `And`, `Or` and `Invert` operations remains unchanged.
+In this example, we reduce the range of the leaf node filters by increasing the lower bound by `1` and decreasing the upper bound by `1`. The structure of all the `All`, `Any` and `Invert` operations remains unchanged.
 
 ```csharp
 var shortenedFilters = filter.Map(f =>
