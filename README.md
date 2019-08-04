@@ -100,3 +100,38 @@ var longestIntervalLength = filter.Aggregate<double>(
     length => double.PositiveInfinity,
     f => f.UpperBound - f.LowerBound);
 ```
+
+### `GetPartial` usage
+
+`GetPartial` provides a way to compute a partial filter, which is a kind of subset of a filter. When applied, a partial filter is guaranteed to return a superset of the result that the original filter would have returned when applied.
+
+This is useful for performing pre-filtering on an incomplete dataset that doesn't (yet) contain all the information required to apply the final filter.
+
+This is normally quite a trivial problem, but when there are `InvertedFilter`s and `CombinationFilters` in the mix, computing the minimal partial filter is not intuitive or easy to demonstrate. 
+
+Here is a contrived example (*note: this doesn't do anything useful, just demonstrates usage*):
+
+```csharp
+// All the numbers from -5 to 10, excluding numbers from 2 to 6
+var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[]
+{
+    new NumericRangeFilter(-5, 10),
+    new InvertedFilter<NumericRangeFilter>(new NumericRangeFilter(2, 6)), 
+}, CombinationOperator.All);
+
+// Exclude filters with negative values
+var partialFilter = filter.GetPartial(f => f.LowerBound >= 0);
+
+// Initially we only have positive numbers
+var positiveValues = new[] {1, 3, 5, 7, 12};
+var prefilteredValues = positiveValues.Where(partialFilter.IsMatch).ToList();
+Assert.Equal(new[] { 1, 7, 12 }, prefilteredValues);
+
+// Now we include some additional values
+var additionalValues = new[] { -7, -4, 11 };
+var combinedValues = prefilteredValues.Concat(additionalValues);
+
+// Finally we apply our 'full' filter
+var finalValues = combinedValues.Where(filter.IsMatch);
+Assert.Equal(new[] { 1, 7, -4 }, finalValues);
+```

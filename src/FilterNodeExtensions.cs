@@ -91,6 +91,56 @@ namespace ExtremeAndy.CombinatoryFilters
                 leafFilter => (IFilterNode<TLeafNode>)leafFilter); // TODO: Figure out a way to remove this evil cast?
         }
 
+        /// <summary>
+        /// Computes the filter that includes only leaf filters that satisfy the given predicate.
+        /// The result is guaranteed to be less than or equal in restrictiveness to the original.
+        /// This means that it will never filter out results that the original filter would not have
+        /// filtered.
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static IFilterNode<TLeafNode> GetPartial<TLeafNode>(this IFilterNode<TLeafNode> filter, Func<TLeafNode, bool> predicate)
+            where TLeafNode : class, ILeafFilterNode
+        {
+            (IFilterNode<TLeafNode> Result, IFilterNode<TLeafNode> ResultToInvert) GetPartialTuple(IFilterNode<TLeafNode> inner)
+            {
+                return inner.Match(
+                    combinationFilter =>
+                    {
+                        var innerPartialTuples = combinationFilter.Filters.Select(GetPartialTuple)
+                            .ToList();
+
+                        return (
+                            Result: new CombinationFilter<TLeafNode>(innerPartialTuples.Select(tuple => tuple.Result), combinationFilter.Operator),
+                            ResultToInvert: new CombinationFilter<TLeafNode>(innerPartialTuples.Select(tuple => tuple.ResultToInvert), combinationFilter.Operator));
+                    },
+                    invertedFilter =>
+                    {
+                        var partialTuple = GetPartialTuple(invertedFilter.FilterToInvert);
+                        return (
+                            Result: new InvertedFilter<TLeafNode>(partialTuple.ResultToInvert),
+                            ResultToInvert: new InvertedFilter<TLeafNode>(partialTuple.Result));
+                    },
+                    leafFilter =>
+                    {
+                        if (predicate(leafFilter))
+                        {
+                            return (Result: (IFilterNode<TLeafNode>)leafFilter, ResultToInvert: (IFilterNode<TLeafNode>)leafFilter);
+                        }
+
+                        // If we are here, it means we're going to remove the leaf filter. For a result that won't be inverted,
+                        // return true - the least restrictive. For a result that will be inverted, return false - the most restrictive.
+                        // The final result can not be more restrictive than the original.
+                        return (Result: FilterNode<TLeafNode>.True, ResultToInvert: FilterNode<TLeafNode>.False);
+                    });
+            }
+
+            return GetPartialTuple(filter)
+                .Result
+                .Collapse();
+        }
+
         internal static Func<TItemToTest, bool> Combine<TItemToTest>(
             IEnumerable<Func<TItemToTest, bool>> innerResults,
             CombinationOperator @operator)
