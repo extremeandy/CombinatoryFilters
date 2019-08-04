@@ -64,6 +64,5 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
 
             Assert.Equal(expectedFilteredValues, filteredValues);
         }
-
     }
 }

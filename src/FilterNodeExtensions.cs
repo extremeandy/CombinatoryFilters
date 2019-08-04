@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace ExtremeAndy.CombinatoryFilters
@@ -39,12 +40,15 @@ namespace ExtremeAndy.CombinatoryFilters
                     return combinationFilter.Operator.Match(
                         () =>
                         {
-                            if (combinationFilter.Filters.Any(f => f.Equals(FilterNode<TLeafNode>.False)))
+                            var collapsedInnerFilters = combinationFilter.Filters.Select(f => f.Collapse())
+                                .ToList();
+
+                            if (collapsedInnerFilters.Any(f => f.Equals(FilterNode<TLeafNode>.False)))
                             {
                                 return FilterNode<TLeafNode>.False;
                             }
 
-                            var nonTrivialFilters = combinationFilter.Filters.Where(f => !f.Equals(FilterNode<TLeafNode>.True));
+                            var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.Equals(FilterNode<TLeafNode>.True));
                             var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, combinationFilter.Operator);
                             return collapsedCombinationFilter.Filters.Count == 1
                                 ? collapsedCombinationFilter.Filters.Single()
@@ -52,12 +56,15 @@ namespace ExtremeAndy.CombinatoryFilters
                         },
                         () =>
                         {
-                            if (combinationFilter.Filters.Any(f => f.Equals(FilterNode<TLeafNode>.True)))
+                            var collapsedInnerFilters = combinationFilter.Filters.Select(f => f.Collapse())
+                                .ToList();
+
+                            if (collapsedInnerFilters.Any(f => f.Equals(FilterNode<TLeafNode>.True)))
                             {
                                 return FilterNode<TLeafNode>.True;
                             }
 
-                            var nonTrivialFilters = combinationFilter.Filters.Where(f => !f.Equals(FilterNode<TLeafNode>.False));
+                            var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.Equals(FilterNode<TLeafNode>.False));
                             var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, combinationFilter.Operator);
                             return collapsedCombinationFilter.Filters.Count == 1
                                 ? collapsedCombinationFilter.Filters.Single()
@@ -66,17 +73,20 @@ namespace ExtremeAndy.CombinatoryFilters
                 },
                 invertedFilter =>
                 {
-                    if (invertedFilter.FilterToInvert is ICombinationFilterNode<TLeafNode> combinationInner && combinationInner.Filters.Count == 0)
+                    var collapsedInnerFilter = invertedFilter.FilterToInvert.Collapse();
+                    // If we have NOT(TRUE) then return FALSE or if we have NOT(FALSE) return TRUE.
+                    if (collapsedInnerFilter is ICombinationFilterNode<TLeafNode> combinationInner && combinationInner.Filters.Count == 0)
                     {
-                        var invertedCombinationOperation = combinationInner.Operator.Match(
-                            () => CombinationOperator.Any, 
-                            () => CombinationOperator.All);
-                        return new CombinationFilter<TLeafNode>(new IFilterNode<TLeafNode>[0], invertedCombinationOperation);
+                        return combinationInner.Operator.Match(() => FilterNode<TLeafNode>.False, () => FilterNode<TLeafNode>.True);
                     }
 
-                    return invertedFilter.FilterToInvert is IInvertedFilter<TLeafNode> invertedInner
-                        ? invertedInner.FilterToInvert
-                        : invertedFilter;
+                    // If we have NOT(NOT(f)) just return f
+                    if (collapsedInnerFilter is IInvertedFilter<TLeafNode> invertedInner)
+                    {
+                        return invertedInner.FilterToInvert;
+                    }
+
+                    return new InvertedFilter<TLeafNode>(collapsedInnerFilter);
                 },
                 leafFilter => (IFilterNode<TLeafNode>)leafFilter); // TODO: Figure out a way to remove this evil cast?
         }
