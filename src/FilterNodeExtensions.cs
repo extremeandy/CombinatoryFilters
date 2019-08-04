@@ -163,7 +163,8 @@ namespace ExtremeAndy.CombinatoryFilters
             this IFilterNode<TLeafNode> filter,
             Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
             Func<IInvertedFilter<TLeafNode>, TResult> invert,
-            Func<TLeafNode, Task<TResult>> transform) where TLeafNode : class, ILeafFilterNode
+            Func<TLeafNode, Task<TResult>> transform)
+            where TLeafNode : class, ILeafFilterNode
         {
             switch (filter)
             {
@@ -173,6 +174,28 @@ namespace ExtremeAndy.CombinatoryFilters
                     return invert(invertedFilter);
                 case TLeafNode leafFilter:
                     return await transform(leafFilter);
+                default:
+                    throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
+            }
+        }
+
+        public static async Task<IFilterNode<TResultLeafNode>> MapAsync<TLeafNode, TResultLeafNode>(
+            this IFilterNode<TLeafNode> filter,
+            Func<TLeafNode, Task<TResultLeafNode>> mapFunc)
+            where TLeafNode : class, ILeafFilterNode
+            where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>
+        {
+            switch (filter)
+            {
+                case ICombinationFilterNode<TLeafNode> combinationFilter:
+                    var innerFilterTasks = combinationFilter.Filters.Select(f => f.MapAsync(mapFunc));
+                    var innerFilters = await Task.WhenAll(innerFilterTasks);
+                    return new CombinationFilter<TResultLeafNode>(innerFilters, combinationFilter.Operator);
+                case IInvertedFilter<TLeafNode> invertedFilter:
+                    var innerFilter = await invertedFilter.FilterToInvert.MapAsync(mapFunc);
+                    return new InvertedFilter<TResultLeafNode>(innerFilter);
+                case TLeafNode leafFilter:
+                    return await mapFunc(leafFilter);
                 default:
                     throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
             }
