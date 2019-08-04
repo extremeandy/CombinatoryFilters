@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ExtremeAndy.CombinatoryFilters
 {
@@ -156,5 +157,25 @@ namespace ExtremeAndy.CombinatoryFilters
 
         internal static Func<TItemToTest, bool> Invert<TItemToTest>(Func<TItemToTest, bool> innerResult)
             => relatedItemCollection => !innerResult(relatedItemCollection);
+
+
+        public static async Task<TResult> MatchAsync<TLeafNode, TResult>(
+            this IFilterNode<TLeafNode> filter,
+            Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
+            Func<IInvertedFilter<TLeafNode>, TResult> invert,
+            Func<TLeafNode, Task<TResult>> transform) where TLeafNode : class, ILeafFilterNode
+        {
+            switch (filter)
+            {
+                case ICombinationFilterNode<TLeafNode> combinationFilter:
+                    return combine(combinationFilter);
+                case IInvertedFilter<TLeafNode> invertedFilter:
+                    return invert(invertedFilter);
+                case TLeafNode leafFilter:
+                    return await transform(leafFilter);
+                default:
+                    throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
+            }
+        }
     }
 }
