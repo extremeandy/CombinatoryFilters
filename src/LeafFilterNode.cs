@@ -29,10 +29,11 @@ namespace ExtremeAndy.CombinatoryFilters
             return mapFunc(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
         }
 
-        public virtual IFilterNode<TThis> Collapse()
-        {
-            return (IFilterNode<TThis>) this;
-        }
+        /// <summary>
+        /// This can be overridden is the leaf filter node is actually collapsible.
+        /// </summary>
+        /// <returns></returns>
+        public virtual IFilterNode<TThis> Collapse() => this;
 
         public bool Any(Func<TThis, bool> predicate)
         {
