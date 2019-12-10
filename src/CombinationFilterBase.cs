@@ -46,6 +46,43 @@ namespace ExtremeAndy.CombinatoryFilters
             return new CombinationFilter<TResultLeafNode>(innerFilters, Operator);
         }
 
+        public IFilterNode<TLeafNode> Collapse()
+        {
+            return Operator.Match(
+                () =>
+                {
+                    var collapsedInnerFilters = Filters.Select(f => f.Collapse())
+                        .ToList();
+
+                    if (collapsedInnerFilters.Any(f => f.Equals(FilterNode<TLeafNode>.False)))
+                    {
+                        return FilterNode<TLeafNode>.False;
+                    }
+
+                    var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.Equals(FilterNode<TLeafNode>.True));
+                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator);
+                    return collapsedCombinationFilter.Filters.Count == 1
+                        ? collapsedCombinationFilter.Filters.Single()
+                        : collapsedCombinationFilter;
+                },
+                () =>
+                {
+                    var collapsedInnerFilters = Filters.Select(f => f.Collapse())
+                        .ToList();
+
+                    if (collapsedInnerFilters.Any(f => f.Equals(FilterNode<TLeafNode>.True)))
+                    {
+                        return FilterNode<TLeafNode>.True;
+                    }
+
+                    var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.Equals(FilterNode<TLeafNode>.False));
+                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator);
+                    return collapsedCombinationFilter.Filters.Count == 1
+                        ? collapsedCombinationFilter.Filters.Single()
+                        : collapsedCombinationFilter;
+                });
+        }
+
         public bool Any(Func<TLeafNode, bool> predicate)
         {
             return Filters.Any(f => f.Any(predicate));

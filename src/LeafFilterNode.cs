@@ -29,6 +29,11 @@ namespace ExtremeAndy.CombinatoryFilters
             return mapFunc(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
         }
 
+        public virtual IFilterNode<TThis> Collapse()
+        {
+            return (IFilterNode<TThis>) this;
+        }
+
         public bool Any(Func<TThis, bool> predicate)
         {
             return predicate(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
