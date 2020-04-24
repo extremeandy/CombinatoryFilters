@@ -40,7 +40,7 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public IFilterNode<TResultLeafNode> Map<TResultLeafNode>(
             Func<TLeafNode, TResultLeafNode> mapFunc)
-            where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>
+            where TResultLeafNode : class, ILeafFilterNode
         {
             var innerFilters = Filters.Select(f => f.Map(mapFunc));
             return new CombinationFilter<TResultLeafNode>(innerFilters, Operator);

@@ -24,9 +24,9 @@ namespace ExtremeAndy.CombinatoryFilters
         }
 
         public IFilterNode<TResultLeafNode> Map<TResultLeafNode>(
-            Func<TThis, TResultLeafNode> mapFunc) where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>
+            Func<TThis, TResultLeafNode> mapFunc) where TResultLeafNode : class, ILeafFilterNode
         {
-            return mapFunc(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
+            return (IFilterNode<TResultLeafNode>)mapFunc(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
         }
 
         /// <summary>

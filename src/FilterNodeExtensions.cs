@@ -117,7 +117,7 @@ namespace ExtremeAndy.CombinatoryFilters
             this IFilterNode<TLeafNode> filter,
             Func<TLeafNode, Task<TResultLeafNode>> mapFunc)
             where TLeafNode : class, ILeafFilterNode
-            where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>
+            where TResultLeafNode : class, ILeafFilterNode
         {
             switch (filter)
             {
@@ -129,7 +129,7 @@ namespace ExtremeAndy.CombinatoryFilters
                     var innerFilter = await invertedFilter.FilterToInvert.MapAsync(mapFunc);
                     return new InvertedFilter<TResultLeafNode>(innerFilter);
                 case TLeafNode leafFilter:
-                    return await mapFunc(leafFilter);
+                    return (IFilterNode<TResultLeafNode>)await mapFunc(leafFilter);
                 default:
                     throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
             }

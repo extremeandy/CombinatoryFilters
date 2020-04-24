@@ -27,7 +27,7 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<TLeafNode, TResult> transform);
 
         public abstract IFilterNode<TResultLeafNode> Map<TResultLeafNode>(Func<TLeafNode, TResultLeafNode> mapFunc)
-            where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>;
+            where TResultLeafNode : class, ILeafFilterNode;
 
         public abstract IFilterNode<TLeafNode> Collapse();
 

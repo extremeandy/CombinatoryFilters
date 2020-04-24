@@ -31,7 +31,7 @@ namespace ExtremeAndy.CombinatoryFilters
         }
 
         public IFilterNode<TResultLeafNode> Map<TResultLeafNode>(Func<TLeafNode, TResultLeafNode> mapFunc)
-            where TResultLeafNode : class, ILeafFilterNode<TResultLeafNode>
+            where TResultLeafNode : class, ILeafFilterNode
         {
             var innerResult = FilterToInvert.Map(mapFunc);
             return new InvertedFilter<TResultLeafNode>(innerResult);
