@@ -29,7 +29,7 @@ namespace ExtremeAndy.CombinatoryFilters
                 return true;
             }
 
-            return other is ICombinationFilterNode<TLeafNode> combinationOther
+            return other is ICombinationFilterNode combinationOther
                    && Filters.SequenceEqual(combinationOther.Filters)
                    && Operator == combinationOther.Operator;
         }
