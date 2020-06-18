@@ -133,5 +133,30 @@ namespace ExtremeAndy.CombinatoryFilters
                     throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
             }
         }
+
+        /// <summary>
+        /// Removes non-matching nodes and replaces them with <see cref="FilterNode{TLeafNode}.True"/>
+        /// </summary>
+        /// <typeparam name="TLeafNode"></typeparam>
+        /// <param name="filter"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static IFilterNode<TLeafNode> Where<TLeafNode>(
+            this IFilterNode<TLeafNode> filter,
+            Func<TLeafNode, bool> predicate)
+            where TLeafNode : class, ILeafFilterNode
+            => filter
+                .Aggregate(
+                    (filters, @operator) => new CombinationFilter<TLeafNode>(filters, @operator),
+                    filterToInvert => new InvertedFilter<TLeafNode>(filterToInvert),
+                    leaf =>
+                    {
+                        if (predicate(leaf))
+                        {
+                            return (IFilterNode<TLeafNode>) leaf;
+                        }
+
+                        return FilterNode<TLeafNode>.True;
+                    });
     }
 }
