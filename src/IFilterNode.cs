@@ -23,6 +23,9 @@ namespace ExtremeAndy.CombinatoryFilters
         IFilterNode<TResultLeafNode> Map<TResultLeafNode>(Func<TLeafNode, TResultLeafNode> mapFunc)
             where TResultLeafNode : class, ILeafFilterNode;
 
+        IFilterNode<TResultLeafNode> Bind<TResultLeafNode>(Func<TLeafNode, IFilterNode<TResultLeafNode>> bindFunc)
+            where TResultLeafNode : class, ILeafFilterNode;
+
         IFilterNode<TLeafNode> Collapse();
 
         bool Any(Func<TLeafNode, bool> predicate);

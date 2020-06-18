@@ -29,6 +29,12 @@ namespace ExtremeAndy.CombinatoryFilters
             return (IFilterNode<TResultLeafNode>)mapFunc(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
         }
 
+        public IFilterNode<TResultLeafNode> Bind<TResultLeafNode>(Func<TThis, IFilterNode<TResultLeafNode>> bindFunc)
+            where TResultLeafNode : class, ILeafFilterNode
+        {
+            return bindFunc(this as TThis);
+        }
+
         public IFilterNode<TThis> Collapse()
         {
             if (IsTrue())

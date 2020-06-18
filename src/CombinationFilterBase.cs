@@ -45,6 +45,13 @@ namespace ExtremeAndy.CombinatoryFilters
             return new CombinationFilter<TResultLeafNode>(innerFilters, Operator);
         }
 
+        public IFilterNode<TResultLeafNode> Bind<TResultLeafNode>(Func<TLeafNode, IFilterNode<TResultLeafNode>> bindFunc)
+            where TResultLeafNode : class, ILeafFilterNode
+        {
+            var innerFilters = Filters.Select(f => f.Bind(bindFunc));
+            return new CombinationFilter<TResultLeafNode>(innerFilters, Operator);
+        }
+
         public IFilterNode<TLeafNode> Collapse()
         {
             return Operator.Match(

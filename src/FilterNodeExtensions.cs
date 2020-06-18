@@ -145,18 +145,14 @@ namespace ExtremeAndy.CombinatoryFilters
             this IFilterNode<TLeafNode> filter,
             Func<TLeafNode, bool> predicate)
             where TLeafNode : class, ILeafFilterNode
-            => filter
-                .Aggregate(
-                    (filters, @operator) => new CombinationFilter<TLeafNode>(filters, @operator),
-                    filterToInvert => new InvertedFilter<TLeafNode>(filterToInvert),
-                    leaf =>
-                    {
-                        if (predicate(leaf))
-                        {
-                            return (IFilterNode<TLeafNode>) leaf;
-                        }
+            => filter.Bind(leafFilter =>
+            {
+                if (predicate(leafFilter))
+                {
+                    return (IFilterNode<TLeafNode>)leafFilter;
+                }
 
-                        return FilterNode<TLeafNode>.True;
-                    });
+                return FilterNode<TLeafNode>.True;
+            });
     }
 }

@@ -37,6 +37,13 @@ namespace ExtremeAndy.CombinatoryFilters
             return new InvertedFilter<TResultLeafNode>(innerResult);
         }
 
+        public IFilterNode<TResultLeafNode> Bind<TResultLeafNode>(Func<TLeafNode, IFilterNode<TResultLeafNode>> bindFunc)
+            where TResultLeafNode : class, ILeafFilterNode
+        {
+            var innerResult = FilterToInvert.Bind(bindFunc);
+            return new InvertedFilter<TResultLeafNode>(innerResult);
+        }
+
         public IFilterNode<TLeafNode> Collapse()
         {
             var collapsedInnerFilter = FilterToInvert.Collapse();
