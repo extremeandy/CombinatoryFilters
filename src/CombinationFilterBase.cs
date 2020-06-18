@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace ExtremeAndy.CombinatoryFilters
@@ -102,11 +101,11 @@ namespace ExtremeAndy.CombinatoryFilters
     public abstract class CombinationFilterBase : InternalFilterNode, ICombinationFilterNode
     {
         protected CombinationFilterBase(IEnumerable<IFilterNode> filters, CombinationOperator @operator = default)
-            : this(filters.ToImmutableHashSet(), @operator)
+            : this(new HashSet<IFilterNode>(filters), @operator)
         {
         }
 
-        protected CombinationFilterBase(IReadOnlyCollection<IFilterNode> filters, CombinationOperator @operator = default)
+        protected CombinationFilterBase(HashSet<IFilterNode> filters, CombinationOperator @operator = default)
         {
             Filters = filters;
             Operator = @operator;

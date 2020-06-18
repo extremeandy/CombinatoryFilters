@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace ExtremeAndy.CombinatoryFilters
@@ -12,14 +11,14 @@ namespace ExtremeAndy.CombinatoryFilters
     public class CombinationFilter<TLeafNode> : CombinationFilterBase<TLeafNode>
         where TLeafNode : class, ILeafFilterNode
     {
-        private readonly IImmutableSet<IFilterNode<TLeafNode>> _filters;
+        private readonly HashSet<IFilterNode<TLeafNode>> _filters;
 
         public CombinationFilter(IEnumerable<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
-            : this(filters.ToImmutableHashSet(), @operator)
+            : this(new HashSet<IFilterNode<TLeafNode>>(filters), @operator)
         {
         }
 
-        public CombinationFilter(IImmutableSet<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
+        private CombinationFilter(HashSet<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
             : base(filters, @operator)
         {
             _filters = filters;
