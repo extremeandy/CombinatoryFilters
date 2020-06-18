@@ -41,9 +41,17 @@ namespace ExtremeAndy.CombinatoryFilters
         {
             var collapsedInnerFilter = FilterToInvert.Collapse();
             // If we have NOT(TRUE) then return FALSE or if we have NOT(FALSE) return TRUE.
-            if (collapsedInnerFilter is ICombinationFilterNode<TLeafNode> combinationInner && combinationInner.Filters.Count == 0)
+            if (collapsedInnerFilter is ICombinationFilterNode<TLeafNode> combinationInner)
             {
-                return combinationInner.Operator.Match(() => FilterNode<TLeafNode>.False, () => FilterNode<TLeafNode>.True);
+                if (combinationInner.IsTrue())
+                {
+                    return FilterNode<TLeafNode>.False;
+                }
+
+                if (combinationInner.IsFalse())
+                {
+                    return FilterNode<TLeafNode>.True;
+                }
             }
 
             // If we have NOT(NOT(f)) just return f
@@ -59,6 +67,10 @@ namespace ExtremeAndy.CombinatoryFilters
         {
             return FilterToInvert.Any(predicate);
         }
+
+        public bool IsTrue() => FilterToInvert.IsFalse();
+
+        public bool IsFalse() => FilterToInvert.IsTrue();
     }
 
     public abstract class InvertedFilter : InternalFilterNode, IInvertedFilter

@@ -54,12 +54,12 @@ namespace ExtremeAndy.CombinatoryFilters
                     var collapsedInnerFilters = Filters.Select(f => f.Collapse())
                         .ToList();
 
-                    if (collapsedInnerFilters.Any(f => f.Equals(FilterNode<TLeafNode>.False)))
+                    if (collapsedInnerFilters.Any(f => f.IsFalse()))
                     {
                         return FilterNode<TLeafNode>.False;
                     }
 
-                    var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.Equals(FilterNode<TLeafNode>.True));
+                    var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.IsTrue());
                     var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator);
                     return collapsedCombinationFilter.Filters.Count == 1
                         ? collapsedCombinationFilter.Filters.Single()
@@ -70,12 +70,12 @@ namespace ExtremeAndy.CombinatoryFilters
                     var collapsedInnerFilters = Filters.Select(f => f.Collapse())
                         .ToList();
 
-                    if (collapsedInnerFilters.Any(f => f.Equals(FilterNode<TLeafNode>.True)))
+                    if (collapsedInnerFilters.Any(f => f.IsTrue()))
                     {
                         return FilterNode<TLeafNode>.True;
                     }
 
-                    var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.Equals(FilterNode<TLeafNode>.False));
+                    var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.IsFalse());
                     var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator);
                     return collapsedCombinationFilter.Filters.Count == 1
                         ? collapsedCombinationFilter.Filters.Single()
@@ -87,6 +87,16 @@ namespace ExtremeAndy.CombinatoryFilters
         {
             return Filters.Any(f => f.Any(predicate));
         }
+
+        public bool IsTrue()
+            => Operator.Match(
+                () => Filters.All(f => f.IsTrue()),
+                () => Filters.Any(f => f.IsTrue()));
+
+        public bool IsFalse()
+            => Operator.Match(
+                () => Filters.Any(f => f.IsFalse()),
+                () => Filters.All(f => f.IsFalse()));
     }
 
     public abstract class CombinationFilterBase : InternalFilterNode, ICombinationFilterNode

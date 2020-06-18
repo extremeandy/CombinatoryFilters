@@ -32,8 +32,14 @@ namespace ExtremeAndy.CombinatoryFilters
                 return true;
             }
 
-            return other is ICombinationFilterNode<TLeafNode> combinationOther
-                   && _filters.SetEquals(combinationOther.Filters)
+            if (other is ICombinationFilterNode<TLeafNode> typedCombinationOther)
+            {
+                return _filters.SetEquals(typedCombinationOther.Filters)
+                       && Operator == typedCombinationOther.Operator;
+            }
+
+            return other is ICombinationFilterNode combinationOther
+                   && _filters.Count == 0 && combinationOther.Filters.Count == 0
                    && Operator == combinationOther.Operator;
         }
 

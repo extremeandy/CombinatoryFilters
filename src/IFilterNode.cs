@@ -26,5 +26,9 @@ namespace ExtremeAndy.CombinatoryFilters
         IFilterNode<TLeafNode> Collapse();
 
         bool Any(Func<TLeafNode, bool> predicate);
+
+        bool IsTrue();
+
+        bool IsFalse();
     }
 }

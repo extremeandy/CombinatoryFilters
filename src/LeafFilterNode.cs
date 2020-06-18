@@ -30,7 +30,7 @@ namespace ExtremeAndy.CombinatoryFilters
         }
 
         /// <summary>
-        /// This can be overridden is the leaf filter node is actually collapsible.
+        /// This can be overridden if the leaf filter node is actually collapsible.
         /// </summary>
         /// <returns></returns>
         public virtual IFilterNode<TThis> Collapse() => this;
@@ -39,5 +39,17 @@ namespace ExtremeAndy.CombinatoryFilters
         {
             return predicate(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
         }
+
+        /// <summary>
+        /// This can be overridden if the leaf filter node can be determined to be True.
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool IsTrue() => false;
+
+        /// <summary>
+        /// This can be overridden if the leaf filter node can be determined to be False.
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool IsFalse() => false;
     }
 }
