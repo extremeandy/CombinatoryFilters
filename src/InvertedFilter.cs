@@ -71,9 +71,10 @@ namespace ExtremeAndy.CombinatoryFilters
         }
 
         public bool Any(Func<TLeafNode, bool> predicate)
-        {
-            return FilterToInvert.Any(predicate);
-        }
+            => FilterToInvert.Any(predicate);
+
+        public bool All(Func<TLeafNode, bool> predicate)
+            => FilterToInvert.All(predicate);
 
         public bool IsTrue() => FilterToInvert.IsFalse();
 

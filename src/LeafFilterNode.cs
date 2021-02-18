@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 
 namespace ExtremeAndy.CombinatoryFilters
 {
@@ -51,9 +50,10 @@ namespace ExtremeAndy.CombinatoryFilters
         }
 
         public bool Any(Func<TThis, bool> predicate)
-        {
-            return predicate(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
-        }
+            => predicate(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
+
+        public bool All(Func<TThis, bool> predicate)
+            => predicate(this as TThis); // Hack to work around c# not supporting higher-order polymorphism
 
         /// <summary>
         /// This can be overridden if the leaf filter node can be determined to be True.

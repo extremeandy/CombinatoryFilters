@@ -30,6 +30,8 @@ namespace ExtremeAndy.CombinatoryFilters
 
         bool Any(Func<TLeafNode, bool> predicate);
 
+        bool All(Func<TLeafNode, bool> predicate);
+
         /// <summary>
         /// Returns <see langword="true" /> if the filter is will always evaluate to <see langword="true" />
         /// regardless of the input, i.e. the filter is trivial and will include everything.

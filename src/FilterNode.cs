@@ -35,7 +35,9 @@ namespace ExtremeAndy.CombinatoryFilters
         public abstract IFilterNode<TLeafNode> Collapse();
 
         public abstract bool Any(Func<TLeafNode, bool> predicate);
-        
+
+        public abstract bool All(Func<TLeafNode, bool> predicate);
+
         public abstract bool IsTrue();
 
         public abstract bool IsFalse();

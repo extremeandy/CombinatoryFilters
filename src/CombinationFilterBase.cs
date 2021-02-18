@@ -90,9 +90,10 @@ namespace ExtremeAndy.CombinatoryFilters
         }
 
         public bool Any(Func<TLeafNode, bool> predicate)
-        {
-            return Filters.Any(f => f.Any(predicate));
-        }
+            => Filters.Any(f => f.Any(predicate));
+
+        public bool All(Func<TLeafNode, bool> predicate)
+            => Filters.All(f => f.All(predicate));
 
         public bool IsTrue()
             => Operator.Match(
