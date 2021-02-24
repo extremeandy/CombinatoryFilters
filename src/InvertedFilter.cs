@@ -6,9 +6,17 @@ namespace ExtremeAndy.CombinatoryFilters
     public class InvertedFilter<TLeafNode> : InvertedFilter, IInvertedFilter<TLeafNode>
         where TLeafNode : class, ILeafFilterNode
     {
-        public InvertedFilter(IFilterNode<TLeafNode> filterToInvert) : base(filterToInvert)
+        private readonly bool _isCollapsed;
+
+        public InvertedFilter(IFilterNode<TLeafNode> filterToInvert)
+            : this(filterToInvert, isCollapsed: false)
+        {
+        }
+
+        internal InvertedFilter(IFilterNode<TLeafNode> filterToInvert, bool isCollapsed) : base(filterToInvert)
         {
             FilterToInvert = filterToInvert;
+            _isCollapsed = isCollapsed;
         }
 
         public new IFilterNode<TLeafNode> FilterToInvert { get; }
@@ -46,6 +54,11 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public IFilterNode<TLeafNode> Collapse()
         {
+            if (_isCollapsed)
+            {
+                return this;
+            }
+
             var collapsedInnerFilter = FilterToInvert.Collapse();
             // If we have NOT(TRUE) then return FALSE or if we have NOT(FALSE) return TRUE.
             if (collapsedInnerFilter is ICombinationFilterNode<TLeafNode> combinationInner)
@@ -67,7 +80,7 @@ namespace ExtremeAndy.CombinatoryFilters
                 return invertedInner.FilterToInvert;
             }
 
-            return new InvertedFilter<TLeafNode>(collapsedInnerFilter);
+            return new InvertedFilter<TLeafNode>(collapsedInnerFilter, isCollapsed: true);
         }
 
         public bool Any(Func<TLeafNode, bool> predicate)

@@ -6,6 +6,15 @@ namespace ExtremeAndy.CombinatoryFilters
     public abstract class LeafFilterNode<TThis> : FilterNode, ILeafFilterNode<TThis>
         where TThis : class, ILeafFilterNode<TThis>
     {
+        private readonly Lazy<bool> _isTrue;
+        private readonly Lazy<bool> _isFalse;
+
+        protected LeafFilterNode()
+        {
+            _isTrue = new Lazy<bool>(IsTrue);
+            _isFalse = new Lazy<bool>(IsFalse);
+        }
+
         public TResult Aggregate<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
@@ -36,12 +45,12 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public IFilterNode<TThis> Collapse()
         {
-            if (IsTrue())
+            if (_isTrue.Value)
             {
                 return FilterNode<TThis>.True;
             }
 
-            if (IsFalse())
+            if (_isFalse.Value)
             {
                 return FilterNode<TThis>.False;
             }

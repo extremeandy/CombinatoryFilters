@@ -14,12 +14,17 @@ namespace ExtremeAndy.CombinatoryFilters
         private readonly HashSet<IFilterNode<TLeafNode>> _filters;
 
         public CombinationFilter(IEnumerable<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
-            : this(new HashSet<IFilterNode<TLeafNode>>(filters), @operator)
+            : this(filters, @operator, isCollapsed: false)
         {
         }
 
-        private CombinationFilter(HashSet<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
-            : base(filters, @operator)
+        internal CombinationFilter(IEnumerable<IFilterNode<TLeafNode>> filters, CombinationOperator @operator, bool isCollapsed)
+            : this(new HashSet<IFilterNode<TLeafNode>>(filters), @operator, isCollapsed)
+        {
+        }
+
+        private CombinationFilter(HashSet<IFilterNode<TLeafNode>> filters, CombinationOperator @operator, bool isCollapsed)
+            : base(filters, @operator, isCollapsed)
         {
             _filters = filters;
         }

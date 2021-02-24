@@ -12,10 +12,13 @@ namespace ExtremeAndy.CombinatoryFilters
     public abstract class CombinationFilterBase<TLeafNode> : CombinationFilterBase, ICombinationFilterNode<TLeafNode>
         where TLeafNode : class, ILeafFilterNode
     {
-        protected CombinationFilterBase(IReadOnlyCollection<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
+        private readonly bool _isCollapsed;
+
+        protected CombinationFilterBase(IReadOnlyCollection<IFilterNode<TLeafNode>> filters, CombinationOperator @operator, bool isCollapsed)
             : base(filters, @operator)
         {
             Filters = filters;
+            _isCollapsed = isCollapsed;
         }
 
         public new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters { get; }
@@ -54,6 +57,11 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public IFilterNode<TLeafNode> Collapse()
         {
+            if (_isCollapsed)
+            {
+                return this;
+            }
+
             return Operator.Match(
                 () =>
                 {
@@ -66,7 +74,7 @@ namespace ExtremeAndy.CombinatoryFilters
                     }
 
                     var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.IsTrue());
-                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator);
+                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator, isCollapsed: true);
                     return collapsedCombinationFilter.Filters.Count == 1
                         ? collapsedCombinationFilter.Filters.Single()
                         : collapsedCombinationFilter;
@@ -82,7 +90,7 @@ namespace ExtremeAndy.CombinatoryFilters
                     }
 
                     var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.IsFalse());
-                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator);
+                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator, isCollapsed: true);
                     return collapsedCombinationFilter.Filters.Count == 1
                         ? collapsedCombinationFilter.Filters.Single()
                         : collapsedCombinationFilter;

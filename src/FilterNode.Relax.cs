@@ -25,12 +25,13 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<TLeafNode, IFilterNode<TLeafNode>> restrictItemFilterFunc)
             where TLeafNode : class, ILeafFilterNode
             => filter.Match(
-                combinationFilter =>
-                {
-                    var innerFilters = combinationFilter.Filters.Select(f => Relax(f, relaxedItemFilterFunc, restrictItemFilterFunc));
-                    return new CombinationFilter<TLeafNode>(innerFilters, combinationFilter.Operator);
-                },
-                invertedFilter => new InvertedFilter<TLeafNode>(Restrict(invertedFilter.FilterToInvert, restrictItemFilterFunc, relaxedItemFilterFunc)),
-                relaxedItemFilterFunc);
+                    combinationFilter =>
+                    {
+                        var innerFilters = combinationFilter.Filters.Select(f => Relax(f, relaxedItemFilterFunc, restrictItemFilterFunc));
+                        return new CombinationFilter<TLeafNode>(innerFilters, combinationFilter.Operator);
+                    },
+                    invertedFilter => new InvertedFilter<TLeafNode>(Restrict(invertedFilter.FilterToInvert, restrictItemFilterFunc, relaxedItemFilterFunc)),
+                    relaxedItemFilterFunc)
+                .Collapse();
     }
 }
