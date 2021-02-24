@@ -91,7 +91,6 @@ namespace ExtremeAndy.CombinatoryFilters
         internal static Func<TItemToTest, bool> Invert<TItemToTest>(Func<TItemToTest, bool> innerResult)
             => relatedItemCollection => !innerResult(relatedItemCollection);
 
-
         public static async Task<TResult> MatchAsync<TLeafNode, TResult>(
             this IFilterNode<TLeafNode> filter,
             Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
@@ -105,6 +104,26 @@ namespace ExtremeAndy.CombinatoryFilters
                     return combine(combinationFilter);
                 case IInvertedFilter<TLeafNode> invertedFilter:
                     return invert(invertedFilter);
+                case TLeafNode leafFilter:
+                    return await transform(leafFilter);
+                default:
+                    throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
+            }
+        }
+
+        public static async Task<TResult> MatchAsync<TLeafNode, TResult>(
+            this IFilterNode<TLeafNode> filter,
+            Func<ICombinationFilterNode<TLeafNode>, Task<TResult>> combine,
+            Func<IInvertedFilter<TLeafNode>, Task<TResult>> invert,
+            Func<TLeafNode, Task<TResult>> transform)
+            where TLeafNode : class, ILeafFilterNode
+        {
+            switch (filter)
+            {
+                case ICombinationFilterNode<TLeafNode> combinationFilter:
+                    return await combine(combinationFilter);
+                case IInvertedFilter<TLeafNode> invertedFilter:
+                    return await invert(invertedFilter);
                 case TLeafNode leafFilter:
                     return await transform(leafFilter);
                 default:
