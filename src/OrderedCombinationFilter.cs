@@ -17,7 +17,12 @@ namespace ExtremeAndy.CombinatoryFilters
         }
 
         public OrderedCombinationFilter(IReadOnlyList<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
-            : base(filters, @operator)
+            : this(filters, @operator, isCollapsed: false)
+        {
+        }
+
+        internal OrderedCombinationFilter(IReadOnlyList<IFilterNode<TLeafNode>> filters, CombinationOperator @operator, bool isCollapsed)
+            : base(filters, @operator, isCollapsed)
         {
         }
 

@@ -37,13 +37,12 @@ namespace ExtremeAndy.CombinatoryFilters
         public static IFilterNode<TLeafNode> GetPartial<TLeafNode>(this IFilterNode<TLeafNode> filter, Func<TLeafNode, bool> predicate)
             where TLeafNode : class, ILeafFilterNode
             => filter.Relax(
-                    leafFilter => predicate(leafFilter)
-                        ? (IFilterNode<TLeafNode>) leafFilter
-                        : FilterNode<TLeafNode>.True,
-                    leafFilter => predicate(leafFilter)
-                        ? (IFilterNode<TLeafNode>) leafFilter
-                        : FilterNode<TLeafNode>.False)
-                .Collapse();
+                leafFilter => predicate(leafFilter)
+                    ? (IFilterNode<TLeafNode>) leafFilter
+                    : FilterNode<TLeafNode>.True,
+                leafFilter => predicate(leafFilter)
+                    ? (IFilterNode<TLeafNode>) leafFilter
+                    : FilterNode<TLeafNode>.False);
 
         internal static Func<TItemToTest, bool> Combine<TItemToTest>(
             IEnumerable<Func<TItemToTest, bool>> innerResults,

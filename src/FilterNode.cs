@@ -9,12 +9,12 @@ namespace ExtremeAndy.CombinatoryFilters
         /// <summary>
         /// Empty filter which is the equivalent of 'true'
         /// </summary>
-        public static OrderedCombinationFilter<TLeafNode> True = new OrderedCombinationFilter<TLeafNode>(new IFilterNode<TLeafNode>[0], CombinationOperator.All);
+        public static OrderedCombinationFilter<TLeafNode> True = new OrderedCombinationFilter<TLeafNode>(new IFilterNode<TLeafNode>[0], CombinationOperator.All, isCollapsed: true);
 
         /// <summary>
         /// Empty filter which is the equivalent of 'false'
         /// </summary>
-        public static OrderedCombinationFilter<TLeafNode> False = new OrderedCombinationFilter<TLeafNode>(new IFilterNode<TLeafNode>[0], CombinationOperator.Any);
+        public static OrderedCombinationFilter<TLeafNode> False = new OrderedCombinationFilter<TLeafNode>(new IFilterNode<TLeafNode>[0], CombinationOperator.Any, isCollapsed: true);
 
         public abstract TResult Aggregate<TResult>(
             Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,

@@ -44,5 +44,30 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
                 interestingCount++;
             }
         }
+
+        [Fact]
+        public void Collapse_ShouldBeReferenceEqual_WhenAlreadyCollapsed()
+        {
+            var interestingCount = 0;
+            while (interestingCount < 10)
+            {
+                const int nodeCount = 10;
+
+                var filter = _generator.GetRandomFilter(nodeCount);
+                var collapsedFilter = filter.Collapse();
+
+                if (filter.Equals(collapsedFilter))
+                {
+                    // Trivial, ignore.
+                    continue;
+                }
+
+                var twiceCollapsedFilter = collapsedFilter.Collapse();
+
+                Assert.Same(collapsedFilter, twiceCollapsedFilter);
+
+                interestingCount++;
+            }
+        }
     }
 }

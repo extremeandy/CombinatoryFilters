@@ -20,12 +20,12 @@ namespace ExtremeAndy.CombinatoryFilters
         /// A function which takes a leaf node and restricts it (i.e. the inverse operation of relax).
         /// </param>
         /// <returns></returns>
-        public static Task<IFilterNode<TLeafNode>> RelaxAsync<TLeafNode>(
+        public static async Task<IFilterNode<TLeafNode>> RelaxAsync<TLeafNode>(
             this IFilterNode<TLeafNode> filter,
             Func<TLeafNode, Task<IFilterNode<TLeafNode>>> relaxedItemFilterFunc,
             Func<TLeafNode, Task<IFilterNode<TLeafNode>>> restrictItemFilterFunc)
             where TLeafNode : class, ILeafFilterNode
-            => filter.Match<Task<IFilterNode<TLeafNode>>>(
+            => (await filter.Match<Task<IFilterNode<TLeafNode>>>(
                 async combinationFilter =>
                 {
                     var innerFilterTasks = combinationFilter.Filters.Select(f => RelaxAsync(f, relaxedItemFilterFunc, restrictItemFilterFunc));
@@ -33,6 +33,7 @@ namespace ExtremeAndy.CombinatoryFilters
                     return new CombinationFilter<TLeafNode>(innerFilters, combinationFilter.Operator);
                 },
                 async invertedFilter => new InvertedFilter<TLeafNode>(await RestrictAsync(invertedFilter.FilterToInvert, restrictItemFilterFunc, relaxedItemFilterFunc)),
-                relaxedItemFilterFunc);
+                relaxedItemFilterFunc))
+                .Collapse();
     }
 }
