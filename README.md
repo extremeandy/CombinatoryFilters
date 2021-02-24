@@ -75,7 +75,7 @@ var isMatch = filter.IsMatch(7);
 
 ## Advanced usage
 
-`IFilterNode<>` supports `Map`, `Match` and `Aggregate` for mapping and reducing filters. 
+`IFilterNode<>` supports `Map`, `Match` and `Aggregate` for mapping and reducing filters.
 
 ### `Map` usage
 
@@ -103,20 +103,20 @@ var longestIntervalLength = filter.Aggregate<double>(
 
 ### `GetPartial` usage
 
-`GetPartial` provides a way to compute a partial filter, which is a kind of subset of a filter. When applied, a partial filter is guaranteed to return a superset of the result that the original filter would have returned when applied.
+`GetPartial` provides a way to compute a partial filter, which is a kind of subset of a filter. When applied, a partial filter is guaranteed to return a superset of the result that the original filter would have returned when applied. This is a special case of the `Relax` operation, where leaf nodes are maximally relaxed (i.e. replaced with `True`) if the predicate is satisfied.
 
 This is useful for performing pre-filtering on an incomplete dataset that doesn't (yet) contain all the information required to apply the final filter.
 
-This is normally quite a trivial problem, but when there are `InvertedFilter`s and `CombinationFilters` in the mix, computing the minimal partial filter is not intuitive or easy to demonstrate. 
+This is normally quite a trivial problem, but when there are `InvertedFilter`s and `CombinationFilters` in the mix, computing the minimal partial filter is not intuitive or easy to demonstrate.
 
-Here is a contrived example (*note: this doesn't do anything useful, just demonstrates usage*):
+Here is a contrived example (_note: this doesn't do anything useful, just demonstrates usage_):
 
 ```csharp
 // All the numbers from -5 to 10, excluding numbers from 2 to 6
 var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[]
 {
     new NumericRangeFilter(-5, 10),
-    new InvertedFilter<NumericRangeFilter>(new NumericRangeFilter(2, 6)), 
+    new InvertedFilter<NumericRangeFilter>(new NumericRangeFilter(2, 6)),
 }, CombinationOperator.All);
 
 // Exclude filters with negative values
@@ -135,3 +135,9 @@ var combinedValues = prefilteredValues.Concat(additionalValues);
 var finalValues = combinedValues.Where(filter.IsMatch);
 Assert.Equal(new[] { 1, 7, -4 }, finalValues);
 ```
+
+### `Relax` usage
+
+`Relax` provides a way to relax a filter by relaxing its leaf nodes.
+
+Example TBD.

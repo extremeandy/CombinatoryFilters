@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace ExtremeAndy.CombinatoryFilters
+﻿namespace ExtremeAndy.CombinatoryFilters
 {
     public static partial class FilterNodeExtensions
     {

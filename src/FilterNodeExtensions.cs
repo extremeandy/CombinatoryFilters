@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ExtremeAndy.CombinatoryFilters
 {
-    public static class FilterNodeExtensions
+    public static partial class FilterNodeExtensions
     {
         public static InvertedFilter<TLeafNode> Invert<TLeafNode>(this IFilterNode<TLeafNode> filter)
             where TLeafNode : class, ILeafFilterNode
@@ -36,44 +36,14 @@ namespace ExtremeAndy.CombinatoryFilters
         /// <returns></returns>
         public static IFilterNode<TLeafNode> GetPartial<TLeafNode>(this IFilterNode<TLeafNode> filter, Func<TLeafNode, bool> predicate)
             where TLeafNode : class, ILeafFilterNode
-        {
-            (IFilterNode<TLeafNode> Result, IFilterNode<TLeafNode> ResultToInvert) GetPartialTuple(IFilterNode<TLeafNode> inner)
-            {
-                return inner.Match(
-                    combinationFilter =>
-                    {
-                        var innerPartialTuples = combinationFilter.Filters.Select(GetPartialTuple)
-                            .ToList();
-
-                        return (
-                            Result: new CombinationFilter<TLeafNode>(innerPartialTuples.Select(tuple => tuple.Result), combinationFilter.Operator),
-                            ResultToInvert: new CombinationFilter<TLeafNode>(innerPartialTuples.Select(tuple => tuple.ResultToInvert), combinationFilter.Operator));
-                    },
-                    invertedFilter =>
-                    {
-                        var partialTuple = GetPartialTuple(invertedFilter.FilterToInvert);
-                        return (
-                            Result: new InvertedFilter<TLeafNode>(partialTuple.ResultToInvert),
-                            ResultToInvert: new InvertedFilter<TLeafNode>(partialTuple.Result));
-                    },
-                    leafFilter =>
-                    {
-                        if (predicate(leafFilter))
-                        {
-                            return (Result: (IFilterNode<TLeafNode>)leafFilter, ResultToInvert: (IFilterNode<TLeafNode>)leafFilter);
-                        }
-
-                        // If we are here, it means we're going to remove the leaf filter. For a result that won't be inverted,
-                        // return true - the least restrictive. For a result that will be inverted, return false - the most restrictive.
-                        // The final result can not be more restrictive than the original.
-                        return (Result: FilterNode<TLeafNode>.True, ResultToInvert: FilterNode<TLeafNode>.False);
-                    });
-            }
-
-            return GetPartialTuple(filter)
-                .Result
+            => filter.Relax(
+                    leafFilter => predicate(leafFilter)
+                        ? (IFilterNode<TLeafNode>) leafFilter
+                        : FilterNode<TLeafNode>.True,
+                    leafFilter => predicate(leafFilter)
+                        ? (IFilterNode<TLeafNode>) leafFilter
+                        : FilterNode<TLeafNode>.False)
                 .Collapse();
-        }
 
         internal static Func<TItemToTest, bool> Combine<TItemToTest>(
             IEnumerable<Func<TItemToTest, bool>> innerResults,
