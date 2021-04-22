@@ -17,7 +17,7 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
             var values = new[] { 1, 3, 5, 9, 11 };
             var expectedFilteredValues = new[] { 9, 11 };
 
-            var filteredValues = values.Where(v => filter.IsMatch(v));
+            var filteredValues = values.Where(filter.IsMatch);
 
             Assert.Equal(expectedFilteredValues, filteredValues);
         }

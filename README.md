@@ -69,6 +69,15 @@ var filter = new NumericRangeFilter(5, 10);
 var isMatch = filter.IsMatch(7);
 ```
 
+However, `IsMatch` causes an allocation and is not recommended for testing many items. Instead, use `filter.GetPredicate`:
+
+```csharp
+var filter = new NumericRangeFilter(5, 10);
+var filterPredicate = filter.GetPredicate<NumericRangeFilter, int>();
+var lotsOfIntegers = Enumerable.Range(0, 1000000);
+var matches = lotsOfIntegers.Where(filterPredicate);
+```
+
 ### Preserving ordering of filters
 
 `CombinationFilter` stores filters as an `IImmutableSet`. If you wish to preserve the order of your filters, use `OrderedCombinationFilter` instead.
@@ -123,8 +132,8 @@ var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRa
 var partialFilter = filter.GetPartial(f => f.LowerBound >= 0);
 
 // Initially we only have positive numbers
-var positiveValues = new[] {1, 3, 5, 7, 12};
-var prefilteredValues = positiveValues.Where(partialFilter.IsMatch).ToList();
+var positiveValues = new[] { 1, 3, 5, 7, 12 };
+var prefilteredValues = positiveValues.Where(partialFilter.GetPredicate<NumericRangeFilter, int>()).ToList();
 Assert.Equal(new[] { 1, 7, 12 }, prefilteredValues);
 
 // Now we include some additional values
@@ -132,7 +141,7 @@ var additionalValues = new[] { -7, -4, 11 };
 var combinedValues = prefilteredValues.Concat(additionalValues);
 
 // Finally we apply our 'full' filter
-var finalValues = combinedValues.Where(filter.IsMatch);
+var finalValues = combinedValues.Where(filter.GetPredicate<NumericRangeFilter, int>());
 Assert.Equal(new[] { 1, 7, -4 }, finalValues);
 ```
 

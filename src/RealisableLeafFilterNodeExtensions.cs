@@ -4,6 +4,7 @@ namespace ExtremeAndy.CombinatoryFilters
 {
     public static class RealisableLeafFilterNodeExtensions
     {
+        [Obsolete("This method is comparatively slow and causes an allocation for each call. Use `GetPredicate` instead and save the result when testing many items.")]
         public static bool IsMatch<TLeafNode, TItemToTest>(
             this IFilterNode<TLeafNode> filter,
             TItemToTest item)

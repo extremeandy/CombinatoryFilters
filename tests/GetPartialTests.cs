@@ -30,13 +30,13 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
             var partialFilter = filter.GetPartial(f => f.LowerBound >= 0);
 
             var positiveValues = new[] {1, 3, 5, 7, 12};
-            var prefilteredValues = positiveValues.Where(partialFilter.IsMatch).ToList();
+            var prefilteredValues = positiveValues.Where(partialFilter.GetPredicate<NumericRangeFilter, int>()).ToList();
             Assert.Equal(new[] { 1, 7, 12 }, prefilteredValues);
 
             var additionalValues = new[] { -7, -4, 11 };
             var combinedValues = prefilteredValues.Concat(additionalValues);
 
-            var finalValues = combinedValues.Where(filter.IsMatch);
+            var finalValues = combinedValues.Where(filter.GetPredicate<NumericRangeFilter, int>());
             Assert.Equal(new[] { 1, 7, -4 }, finalValues);
         }
 
@@ -83,9 +83,9 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
                     .ToHashSet();
                 var partial = filter.GetPartial(f => !charsToExclude.Contains(f.Character));
 
-                var partialResult = strings.Where(s => partial.IsMatch(s))
+                var partialResult = strings.Where(partial.GetPredicate<CharFilter, string>())
                     .ToHashSet();
-                var finalResult = partialResult.Where(s => filter.IsMatch(s))
+                var finalResult = partialResult.Where(filter.GetPredicate<CharFilter, string>())
                     .ToHashSet();
 
                 if (partialResult.Count == strings.Count || finalResult.Count == partialResult.Count)
@@ -94,7 +94,7 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
                     continue;
                 }
 
-                var originalResult = strings.Where(s => filter.IsMatch(s))
+                var originalResult = strings.Where(filter.GetPredicate<CharFilter, string>())
                     .ToHashSet();
 
                 Assert.Equal(originalResult, finalResult);

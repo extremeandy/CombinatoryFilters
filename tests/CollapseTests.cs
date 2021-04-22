@@ -37,8 +37,8 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
                     continue;
                 }
 
-                var expectedResult = strings.Where(filter.IsMatch);
-                var actualResult = strings.Where(collapsedFilter.IsMatch);
+                var expectedResult = strings.Where(filter.GetPredicate<CharFilter, string>());
+                var actualResult = strings.Where(collapsedFilter.GetPredicate<CharFilter, string>());
 
                 Assert.Equal(expectedResult, actualResult);
                 interestingCount++;
