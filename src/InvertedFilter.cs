@@ -2,7 +2,7 @@
 
 namespace ExtremeAndy.CombinatoryFilters
 {
-    public class InvertedFilter<TLeafNode> : InvertedFilter, IInvertedFilter<TLeafNode>
+    public sealed class InvertedFilter<TLeafNode> : InternalFilterNode, IInvertedFilter<TLeafNode>
         where TLeafNode : class, ILeafFilterNode
     {
         private readonly bool _isCollapsed;
@@ -12,13 +12,15 @@ namespace ExtremeAndy.CombinatoryFilters
         {
         }
 
-        internal InvertedFilter(IFilterNode<TLeafNode> filterToInvert, bool isCollapsed) : base(filterToInvert)
+        internal InvertedFilter(IFilterNode<TLeafNode> filterToInvert, bool isCollapsed)
         {
             FilterToInvert = filterToInvert;
             _isCollapsed = isCollapsed;
         }
 
-        public new IFilterNode<TLeafNode> FilterToInvert { get; }
+        public IFilterNode<TLeafNode> FilterToInvert { get; }
+
+        IFilterNode IInvertedFilter.FilterToInvert => FilterToInvert;
 
         public TResult Aggregate<TResult>(
             Func<TResult[], CombinationOperator, TResult> combine,
@@ -91,16 +93,6 @@ namespace ExtremeAndy.CombinatoryFilters
         public bool IsTrue() => FilterToInvert.IsFalse();
 
         public bool IsFalse() => FilterToInvert.IsTrue();
-    }
-
-    public abstract class InvertedFilter : InternalFilterNode, IInvertedFilter
-    {
-        protected InvertedFilter(IFilterNode filterToInvert)
-        {
-            FilterToInvert = filterToInvert;
-        }
-
-        public IFilterNode FilterToInvert { get; }
 
         public override bool Equals(IFilterNode other)
         {
@@ -112,7 +104,7 @@ namespace ExtremeAndy.CombinatoryFilters
             return other is IInvertedFilter invertedOther
                    && FilterToInvert.Equals(invertedOther.FilterToInvert);
         }
-        
+
         public override int GetHashCode()
         {
             unchecked

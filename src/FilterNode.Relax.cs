@@ -28,7 +28,7 @@ namespace ExtremeAndy.CombinatoryFilters
                     combinationFilter =>
                     {
                         var innerFilters = combinationFilter.Filters.Select(f => Relax(f, relaxedItemFilterFunc, restrictItemFilterFunc));
-                        return new CombinationFilter<TLeafNode>(innerFilters, combinationFilter.Operator);
+                        return new CombinationFilter<TLeafNode>(innerFilters, combinationFilter.Operator, combinationFilter.PreserveOrder);
                     },
                     invertedFilter => new InvertedFilter<TLeafNode>(Restrict(invertedFilter.FilterToInvert, restrictItemFilterFunc, relaxedItemFilterFunc)),
                     relaxedItemFilterFunc)

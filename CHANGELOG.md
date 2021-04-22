@@ -11,4 +11,4 @@ and this project (will try to) adhere to [Semantic Versioning](https://semver.or
 
 - Use arrays in some functions like `Aggregate` so that we can benefit from using `for` loops without needing to allocate iterators or lambdas to combine the results
 - Renamed `ICombinationFilterNode` to simply `ICombinationFilter`
-- Removed distinction between `CombinationFilter` and `OrderedCombinationFilter`, which was only useful for `FilterNode` `True` and `False` fields, and it was unclear whether equality was properly implemented between the two classes.
+- Removed `OrderedCombinationFilter` and added new parameter `PreserveOrder` to constructor of `CombinationFilter`.

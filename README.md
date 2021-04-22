@@ -80,7 +80,7 @@ var matches = lotsOfIntegers.Where(filterPredicate);
 
 ### Preserving ordering of filters
 
-`CombinationFilter` stores filters as an `IImmutableSet`. If you wish to preserve the order of your filters, use `OrderedCombinationFilter` instead.
+`CombinationFilter` defaults to storing filters as a `HashSet<T>`. If you wish to preserve the order of your filters, pass `preserveOrder: true` in the constructor of `CombinationFilter`.
 
 ## Advanced usage
 

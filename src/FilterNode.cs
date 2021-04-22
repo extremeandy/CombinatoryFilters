@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace ExtremeAndy.CombinatoryFilters
 {
@@ -9,12 +8,12 @@ namespace ExtremeAndy.CombinatoryFilters
         /// <summary>
         /// Empty filter which is the equivalent of 'true'
         /// </summary>
-        public static readonly CombinationFilter<TLeafNode> True = new CombinationFilter<TLeafNode>(Array.Empty<IFilterNode<TLeafNode>>(), CombinationOperator.All, isCollapsed: true);
+        public static readonly CombinationFilter<TLeafNode> True = new CombinationFilter<TLeafNode>(Array.Empty<IFilterNode<TLeafNode>>(), CombinationOperator.All, preserveOrder: true, isCollapsed: true);
 
         /// <summary>
         /// Empty filter which is the equivalent of 'false'
         /// </summary>
-        public static readonly CombinationFilter<TLeafNode> False = new CombinationFilter<TLeafNode>(Array.Empty<IFilterNode<TLeafNode>>(), CombinationOperator.Any, isCollapsed: true);
+        public static readonly CombinationFilter<TLeafNode> False = new CombinationFilter<TLeafNode>(Array.Empty<IFilterNode<TLeafNode>>(), CombinationOperator.Any, preserveOrder: true, isCollapsed: true);
 
         public abstract TResult Aggregate<TResult>(
             Func<TResult[], CombinationOperator, TResult> combine,

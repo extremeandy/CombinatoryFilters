@@ -7,6 +7,8 @@ namespace ExtremeAndy.CombinatoryFilters
         IReadOnlyCollection<IFilterNode> Filters { get; }
 
         CombinationOperator Operator { get; }
+
+        bool PreserveOrder { get; }
     }
 
     public interface ICombinationFilter<out TLeafNode> : IInternalFilterNode<TLeafNode>, ICombinationFilter

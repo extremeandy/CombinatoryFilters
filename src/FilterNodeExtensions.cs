@@ -132,7 +132,7 @@ namespace ExtremeAndy.CombinatoryFilters
                 case ICombinationFilter<TLeafNode> combinationFilter:
                     var innerFilterTasks = combinationFilter.Filters.Select(f => f.MapAsync(mapFunc));
                     var innerFilters = await Task.WhenAll(innerFilterTasks);
-                    return new CombinationFilter<TResultLeafNode>(innerFilters, combinationFilter.Operator);
+                    return new CombinationFilter<TResultLeafNode>(innerFilters, combinationFilter.Operator, combinationFilter.PreserveOrder);
                 case IInvertedFilter<TLeafNode> invertedFilter:
                     var innerFilter = await invertedFilter.FilterToInvert.MapAsync(mapFunc);
                     return new InvertedFilter<TResultLeafNode>(innerFilter);
