@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace ExtremeAndy.CombinatoryFilters
 {
@@ -11,7 +10,7 @@ namespace ExtremeAndy.CombinatoryFilters
         where TLeafNode : class, ILeafFilterNode
     {
         TResult Aggregate<TResult>(
-            Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
+            Func<TResult[], CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform);
 

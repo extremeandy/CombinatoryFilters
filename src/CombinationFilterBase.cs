@@ -13,23 +13,29 @@ namespace ExtremeAndy.CombinatoryFilters
         where TLeafNode : class, ILeafFilterNode
     {
         private readonly bool _isCollapsed;
+        private readonly IFilterNode<TLeafNode>[] _filters;
 
         protected CombinationFilterBase(IReadOnlyCollection<IFilterNode<TLeafNode>> filters, CombinationOperator @operator, bool isCollapsed)
             : base(filters, @operator)
         {
-            Filters = filters;
+            _filters = filters.ToArray();
             _isCollapsed = isCollapsed;
         }
 
-        public new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters { get; }
+        public new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters => _filters;
 
         public TResult Aggregate<TResult>(
-            Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
+            Func<TResult[], CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform)
         {
-            var innerFilters = Filters.Select(f => f.Aggregate(combine, invert, transform));
-            return combine(innerFilters, Operator);
+            var mappedInnerFilters = new TResult[_filters.Length];
+            for (var i = 0; i < _filters.Length; i++)
+            {
+                mappedInnerFilters[i] = _filters[i].Aggregate(combine, invert, transform);
+            }
+
+            return combine(mappedInnerFilters, Operator);
         }
 
         public TResult Match<TResult>(

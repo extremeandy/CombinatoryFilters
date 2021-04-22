@@ -17,7 +17,7 @@ namespace ExtremeAndy.CombinatoryFilters
         public static readonly OrderedCombinationFilter<TLeafNode> False = new OrderedCombinationFilter<TLeafNode>(Array.Empty<IFilterNode<TLeafNode>>(), CombinationOperator.Any, isCollapsed: true);
 
         public abstract TResult Aggregate<TResult>(
-            Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
+            Func<TResult[], CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform);
 

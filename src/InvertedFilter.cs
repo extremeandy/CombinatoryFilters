@@ -22,7 +22,7 @@ namespace ExtremeAndy.CombinatoryFilters
         public new IFilterNode<TLeafNode> FilterToInvert { get; }
 
         public TResult Aggregate<TResult>(
-            Func<IEnumerable<TResult>, CombinationOperator, TResult> combine,
+            Func<TResult[], CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform)
         {

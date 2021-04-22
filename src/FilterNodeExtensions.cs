@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -45,14 +44,36 @@ namespace ExtremeAndy.CombinatoryFilters
                     : FilterNode<TLeafNode>.False);
 
         internal static Func<TItemToTest, bool> Combine<TItemToTest>(
-            IEnumerable<Func<TItemToTest, bool>> innerResults,
+            Func<TItemToTest, bool>[] innerResults,
             CombinationOperator @operator)
         {
             Func<TItemToTest, bool> AllReducer()
-                => relatedItemCollection => innerResults.All(comparator => comparator(relatedItemCollection));
+                => relatedItemCollection =>
+                {
+                    for (var i = 0; i < innerResults.Length; i++)
+                    {
+                        if (!innerResults[i](relatedItemCollection))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                };
 
             Func<TItemToTest, bool> AnyReducer()
-                => relatedItemCollection => innerResults.Any(comparator => comparator(relatedItemCollection));
+                => relatedItemCollection =>
+                {
+                    for (var i = 0; i < innerResults.Length; i++)
+                    {
+                        if (innerResults[i](relatedItemCollection))
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                };
 
             return @operator.Match(AllReducer, AnyReducer);
         }
