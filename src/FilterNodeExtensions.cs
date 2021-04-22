@@ -83,14 +83,14 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public static async Task<TResult> MatchAsync<TLeafNode, TResult>(
             this IFilterNode<TLeafNode> filter,
-            Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
+            Func<ICombinationFilter<TLeafNode>, TResult> combine,
             Func<IInvertedFilter<TLeafNode>, TResult> invert,
             Func<TLeafNode, Task<TResult>> transform)
             where TLeafNode : class, ILeafFilterNode
         {
             switch (filter)
             {
-                case ICombinationFilterNode<TLeafNode> combinationFilter:
+                case ICombinationFilter<TLeafNode> combinationFilter:
                     return combine(combinationFilter);
                 case IInvertedFilter<TLeafNode> invertedFilter:
                     return invert(invertedFilter);
@@ -103,14 +103,14 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public static async Task<TResult> MatchAsync<TLeafNode, TResult>(
             this IFilterNode<TLeafNode> filter,
-            Func<ICombinationFilterNode<TLeafNode>, Task<TResult>> combine,
+            Func<ICombinationFilter<TLeafNode>, Task<TResult>> combine,
             Func<IInvertedFilter<TLeafNode>, Task<TResult>> invert,
             Func<TLeafNode, Task<TResult>> transform)
             where TLeafNode : class, ILeafFilterNode
         {
             switch (filter)
             {
-                case ICombinationFilterNode<TLeafNode> combinationFilter:
+                case ICombinationFilter<TLeafNode> combinationFilter:
                     return await combine(combinationFilter);
                 case IInvertedFilter<TLeafNode> invertedFilter:
                     return await invert(invertedFilter);
@@ -129,7 +129,7 @@ namespace ExtremeAndy.CombinatoryFilters
         {
             switch (filter)
             {
-                case ICombinationFilterNode<TLeafNode> combinationFilter:
+                case ICombinationFilter<TLeafNode> combinationFilter:
                     var innerFilterTasks = combinationFilter.Filters.Select(f => f.MapAsync(mapFunc));
                     var innerFilters = await Task.WhenAll(innerFilterTasks);
                     return new CombinationFilter<TResultLeafNode>(innerFilters, combinationFilter.Operator);

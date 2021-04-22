@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace ExtremeAndy.CombinatoryFilters
 {
@@ -31,7 +30,7 @@ namespace ExtremeAndy.CombinatoryFilters
         }
 
         public TResult Match<TResult>(
-            Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
+            Func<ICombinationFilter<TLeafNode>, TResult> combine,
             Func<IInvertedFilter<TLeafNode>, TResult> invert,
             Func<TLeafNode, TResult> transform)
         {
@@ -61,7 +60,7 @@ namespace ExtremeAndy.CombinatoryFilters
 
             var collapsedInnerFilter = FilterToInvert.Collapse();
             // If we have NOT(TRUE) then return FALSE or if we have NOT(FALSE) return TRUE.
-            if (collapsedInnerFilter is ICombinationFilterNode<TLeafNode> combinationInner)
+            if (collapsedInnerFilter is ICombinationFilter<TLeafNode> combinationInner)
             {
                 if (combinationInner.IsTrue())
                 {

@@ -9,12 +9,12 @@ namespace ExtremeAndy.CombinatoryFilters
         /// <summary>
         /// Empty filter which is the equivalent of 'true'
         /// </summary>
-        public static readonly OrderedCombinationFilter<TLeafNode> True = new OrderedCombinationFilter<TLeafNode>(Array.Empty<IFilterNode<TLeafNode>>(), CombinationOperator.All, isCollapsed: true);
+        public static readonly CombinationFilter<TLeafNode> True = new CombinationFilter<TLeafNode>(Array.Empty<IFilterNode<TLeafNode>>(), CombinationOperator.All, isCollapsed: true);
 
         /// <summary>
         /// Empty filter which is the equivalent of 'false'
         /// </summary>
-        public static readonly OrderedCombinationFilter<TLeafNode> False = new OrderedCombinationFilter<TLeafNode>(Array.Empty<IFilterNode<TLeafNode>>(), CombinationOperator.Any, isCollapsed: true);
+        public static readonly CombinationFilter<TLeafNode> False = new CombinationFilter<TLeafNode>(Array.Empty<IFilterNode<TLeafNode>>(), CombinationOperator.Any, isCollapsed: true);
 
         public abstract TResult Aggregate<TResult>(
             Func<TResult[], CombinationOperator, TResult> combine,
@@ -22,7 +22,7 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<TLeafNode, TResult> transform);
 
         public abstract TResult Match<TResult>(
-            Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
+            Func<ICombinationFilter<TLeafNode>, TResult> combine,
             Func<IInvertedFilter<TLeafNode>, TResult> invert,
             Func<TLeafNode, TResult> transform);
 

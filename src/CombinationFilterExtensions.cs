@@ -6,7 +6,7 @@ namespace ExtremeAndy.CombinatoryFilters
     public static class CombinationFilterExtensions
     {
         public static TResult Match<TResult, TLeafNode>(
-            this ICombinationFilterNode<TLeafNode> source,
+            this ICombinationFilter<TLeafNode> source,
             Func<IEnumerable<IFilterNode<TLeafNode>>, TResult> allReducer,
             Func<IEnumerable<IFilterNode<TLeafNode>>, TResult> anyReducer)
             where TLeafNode : class, ILeafFilterNode

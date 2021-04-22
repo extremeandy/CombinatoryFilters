@@ -9,37 +9,37 @@ namespace ExtremeAndy.CombinatoryFilters
     /// then given <see cref="CombinationOperator"/>
     /// </summary>
     /// <typeparam name="TLeafNode"></typeparam>
-    public abstract class CombinationFilterBase<TLeafNode> : CombinationFilterBase, ICombinationFilterNode<TLeafNode>
+    public abstract class CombinationFilterBase<TLeafNode> : CombinationFilterBase, ICombinationFilter<TLeafNode>
         where TLeafNode : class, ILeafFilterNode
     {
         private readonly bool _isCollapsed;
-        private readonly IFilterNode<TLeafNode>[] _filters;
+        protected readonly IFilterNode<TLeafNode>[] FiltersArray;
 
         protected CombinationFilterBase(IReadOnlyCollection<IFilterNode<TLeafNode>> filters, CombinationOperator @operator, bool isCollapsed)
             : base(filters, @operator)
         {
-            _filters = filters.ToArray();
+            FiltersArray = filters.ToArray();
             _isCollapsed = isCollapsed;
         }
 
-        public new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters => _filters;
+        public new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters => FiltersArray;
 
         public TResult Aggregate<TResult>(
             Func<TResult[], CombinationOperator, TResult> combine,
             Func<TResult, TResult> invert,
             Func<TLeafNode, TResult> transform)
         {
-            var mappedInnerFilters = new TResult[_filters.Length];
-            for (var i = 0; i < _filters.Length; i++)
+            var mappedInnerFilters = new TResult[FiltersArray.Length];
+            for (var i = 0; i < FiltersArray.Length; i++)
             {
-                mappedInnerFilters[i] = _filters[i].Aggregate(combine, invert, transform);
+                mappedInnerFilters[i] = FiltersArray[i].Aggregate(combine, invert, transform);
             }
 
             return combine(mappedInnerFilters, Operator);
         }
 
         public TResult Match<TResult>(
-            Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
+            Func<ICombinationFilter<TLeafNode>, TResult> combine,
             Func<IInvertedFilter<TLeafNode>, TResult> invert,
             Func<TLeafNode, TResult> transform)
         {
@@ -120,7 +120,7 @@ namespace ExtremeAndy.CombinatoryFilters
                 () => Filters.All(f => f.IsFalse()));
     }
 
-    public abstract class CombinationFilterBase : InternalFilterNode, ICombinationFilterNode
+    public abstract class CombinationFilterBase : InternalFilterNode, ICombinationFilter
     {
         protected CombinationFilterBase(IEnumerable<IFilterNode> filters, CombinationOperator @operator = default)
             : this(new HashSet<IFilterNode>(filters), @operator)

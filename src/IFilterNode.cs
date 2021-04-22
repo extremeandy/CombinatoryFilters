@@ -15,7 +15,7 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<TLeafNode, TResult> transform);
 
         TResult Match<TResult>(
-            Func<ICombinationFilterNode<TLeafNode>, TResult> combine,
+            Func<ICombinationFilter<TLeafNode>, TResult> combine,
             Func<IInvertedFilter<TLeafNode>, TResult> invert,
             Func<TLeafNode, TResult> transform);
 

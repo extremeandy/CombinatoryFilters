@@ -2,14 +2,14 @@
 
 namespace ExtremeAndy.CombinatoryFilters
 {
-    public interface ICombinationFilterNode : IInternalFilterNode
+    public interface ICombinationFilter : IInternalFilterNode
     {
         IReadOnlyCollection<IFilterNode> Filters { get; }
 
         CombinationOperator Operator { get; }
     }
 
-    public interface ICombinationFilterNode<out TLeafNode> : IInternalFilterNode<TLeafNode>, ICombinationFilterNode
+    public interface ICombinationFilter<out TLeafNode> : IInternalFilterNode<TLeafNode>, ICombinationFilter
         where TLeafNode : class, ILeafFilterNode
     {
         new IReadOnlyCollection<IFilterNode<TLeafNode>> Filters { get; }

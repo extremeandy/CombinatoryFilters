@@ -23,7 +23,7 @@ namespace ExtremeAndy.CombinatoryFilters
         }
 
         public TResult Match<TResult>(
-            Func<ICombinationFilterNode<TThis>, TResult> combine,
+            Func<ICombinationFilter<TThis>, TResult> combine,
             Func<IInvertedFilter<TThis>, TResult> invert,
             Func<TThis, TResult> transform)
         {

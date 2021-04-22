@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ExtremeAndy.CombinatoryFilters
@@ -11,7 +12,7 @@ namespace ExtremeAndy.CombinatoryFilters
     public class CombinationFilter<TLeafNode> : CombinationFilterBase<TLeafNode>
         where TLeafNode : class, ILeafFilterNode
     {
-        private readonly HashSet<IFilterNode<TLeafNode>> _filters;
+        private readonly Lazy<int> _hashCode;
 
         public CombinationFilter(IEnumerable<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
             : this(filters, @operator, isCollapsed: false)
@@ -23,10 +24,22 @@ namespace ExtremeAndy.CombinatoryFilters
         {
         }
 
+        public readonly HashSet<IFilterNode<TLeafNode>> FiltersSet;
+
         private CombinationFilter(HashSet<IFilterNode<TLeafNode>> filters, CombinationOperator @operator, bool isCollapsed)
             : base(filters, @operator, isCollapsed)
         {
-            _filters = filters;
+            FiltersSet = filters;
+            _hashCode = new Lazy<int>(() =>
+            {
+                var filterHashCodes = filters
+                    .Select(x => x.GetHashCode())
+                    .OrderBy(x => x);
+
+                var hashCode = filterHashCodes.Aggregate(0, (acc, h) => (acc * 397) ^ h);
+                hashCode = (hashCode * 397) ^ Operator.GetHashCode();
+                return hashCode;
+            });
         }
 
         public override bool Equals(IFilterNode other)
@@ -36,29 +49,22 @@ namespace ExtremeAndy.CombinatoryFilters
                 return true;
             }
 
-            if (other is ICombinationFilterNode<TLeafNode> typedCombinationOther)
+            if (other is CombinationFilter<TLeafNode> concreteCombinationOther && other.GetType() == typeof(CombinationFilter<TLeafNode>))
             {
-                return _filters.SetEquals(typedCombinationOther.Filters)
-                       && Operator == typedCombinationOther.Operator;
+                return FiltersSet.SetEquals(concreteCombinationOther.FiltersSet)
+                       && Operator == concreteCombinationOther.Operator;
             }
 
-            return other is ICombinationFilterNode combinationOther
-                   && _filters.Count == 0 && combinationOther.Filters.Count == 0
-                   && Operator == combinationOther.Operator;
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
+            if (other is OrderedCombinationFilter<TLeafNode> orderedCombinationOther &&
+                other.GetType() == typeof(OrderedCombinationFilter<TLeafNode>))
             {
-                var filterHashCodes = Filters
-                    .Select(x => x.GetHashCode())
-                    .OrderBy(x => x);
-
-                var hashCode = filterHashCodes.Aggregate(0, (acc, h) => (acc * 397) ^ h);
-                hashCode = (hashCode * 397) ^ Operator.GetHashCode();
-                return hashCode;
+                return FiltersSet.SequenceEqual(orderedCombinationOther.Filters)
+                       && Operator == orderedCombinationOther.Operator;
             }
+
+            return false;
         }
+
+        public override int GetHashCode() => _hashCode.Value;
     }
 }

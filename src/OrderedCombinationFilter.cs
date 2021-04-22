@@ -8,7 +8,7 @@ namespace ExtremeAndy.CombinatoryFilters
     /// then given <see cref="CombinationOperator"/>
     /// </summary>
     /// <typeparam name="TLeafNode"></typeparam>
-    public class OrderedCombinationFilter<TLeafNode> : CombinationFilterBase<TLeafNode>, ICombinationFilterNode<TLeafNode>
+    public class OrderedCombinationFilter<TLeafNode> : CombinationFilterBase<TLeafNode>
         where TLeafNode : class, ILeafFilterNode
     {
         public OrderedCombinationFilter(IEnumerable<IFilterNode<TLeafNode>> filters, CombinationOperator @operator = default)
@@ -33,9 +33,19 @@ namespace ExtremeAndy.CombinatoryFilters
                 return true;
             }
 
-            return other is ICombinationFilterNode combinationOther
-                   && Filters.SequenceEqual(combinationOther.Filters)
-                   && Operator == combinationOther.Operator;
+            if (other is OrderedCombinationFilter<TLeafNode> orderedCombinationOther && other.GetType() == typeof(OrderedCombinationFilter<TLeafNode>))
+            {
+                return Filters.SequenceEqual(orderedCombinationOther.Filters)
+                       && Operator == orderedCombinationOther.Operator;
+            }
+
+            if (other is CombinationFilter<TLeafNode> concreteCombinationOther && other.GetType() == typeof(CombinationFilter<TLeafNode>))
+            {
+                return concreteCombinationOther.FiltersSet.SetEquals(Filters)
+                       && Operator == concreteCombinationOther.Operator;
+            }
+
+            return false;
         }
 
         public override int GetHashCode()
