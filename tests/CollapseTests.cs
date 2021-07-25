@@ -69,5 +69,53 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
                 interestingCount++;
             }
         }
+
+        [Theory]
+        [InlineData(CombinationOperator.All, CombinationOperator.Any)]
+        [InlineData(CombinationOperator.Any, CombinationOperator.All)]
+        public void Collapse_ShouldFlattenNestedCombinations_WhenInnerOperatorMatchesOuter(CombinationOperator outerCombinationOperator, CombinationOperator alternateInnerCombinationOperator)
+        {
+            var filterA = new CharFilter('A');
+            var filterB = new CharFilter('B');
+            var filterC = new CharFilter('C');
+            var filterD = new CharFilter('D');
+            var filterE = new CharFilter('E');
+            var filterF = new CharFilter('F');
+            var filterG = new CharFilter('G');
+            var filterH = new CharFilter('H');
+
+            var innerCombinationFilterToFlatten = new CombinationFilter<CharFilter>(new [] { filterA, filterB }, outerCombinationOperator);
+            var innerCombinationFilterToRetain1 = new CombinationFilter<CharFilter>(new [] { filterC, filterD }, alternateInnerCombinationOperator);
+            var innerCombinationFilterToRetain2 = new CombinationFilter<CharFilter>(new[] { filterE, filterF }, alternateInnerCombinationOperator);
+
+            // When outer operator == All and other == Any, this is equivalent to
+            // (A AND B) AND (C OR D) AND (E OR F) AND G AND H
+            // Which can be collapsed to: A AND B AND G AND H AND (C OR D) AND (E OR F)
+            // When outer operator == Any and other == All, this is equivalent to
+            // (A OR B) OR (C AND D) OR (E AND F) OR G OR H
+            // Which can be collapsed to: A OR B OR G OR H OR (C AND D) OR (E AND F)
+            var outerCombinationFilter = new CombinationFilter<CharFilter>(new IFilterNode<CharFilter>[]
+            {
+                innerCombinationFilterToFlatten,
+                innerCombinationFilterToRetain1,
+                innerCombinationFilterToRetain2,
+                filterG,
+                filterH
+            }, outerCombinationOperator);
+
+            var collapsedFilter = outerCombinationFilter.Collapse();
+
+            var expectedCollapsedFilter = new CombinationFilter<CharFilter>(new IFilterNode<CharFilter>[]
+            {
+                filterA,
+                filterB,
+                filterG,
+                filterH,
+                innerCombinationFilterToRetain1,
+                innerCombinationFilterToRetain2
+            }, outerCombinationOperator);
+
+            Assert.Equal(expectedCollapsedFilter, collapsedFilter);
+        }
     }
 }
