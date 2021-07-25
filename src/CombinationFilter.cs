@@ -121,6 +121,20 @@ namespace ExtremeAndy.CombinatoryFilters
                 return this;
             }
 
+            IEnumerable<IFilterNode<TLeafNode>> Flatten(IFilterNode<TLeafNode> innerFilter)
+            {
+                if (innerFilter is CombinationFilter<TLeafNode> combinationFilter &&
+                    combinationFilter.Operator == Operator)
+                {
+                    return combinationFilter.Filters;
+                }
+
+                return new[]
+                {
+                    innerFilter
+                };
+            }
+
             return Operator.Match(
                 () =>
                 {
@@ -133,7 +147,10 @@ namespace ExtremeAndy.CombinatoryFilters
                     }
 
                     var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.IsTrue());
-                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator, PreserveOrder, isCollapsed: true);
+
+                    var flattenedNonTrivialFilters = nonTrivialFilters.SelectMany(Flatten);
+
+                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(flattenedNonTrivialFilters, Operator, PreserveOrder, isCollapsed: true);
                     return collapsedCombinationFilter.Filters.Count == 1
                         ? collapsedCombinationFilter.Filters.Single()
                         : collapsedCombinationFilter;
@@ -149,7 +166,10 @@ namespace ExtremeAndy.CombinatoryFilters
                     }
 
                     var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.IsFalse());
-                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(nonTrivialFilters, Operator, PreserveOrder, isCollapsed: true);
+
+                    var flattenedNonTrivialFilters = nonTrivialFilters.SelectMany(Flatten);
+
+                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(flattenedNonTrivialFilters, Operator, PreserveOrder, isCollapsed: true);
                     return collapsedCombinationFilter.Filters.Count == 1
                         ? collapsedCombinationFilter.Filters.Single()
                         : collapsedCombinationFilter;

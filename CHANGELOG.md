@@ -12,3 +12,7 @@ and this project (will try to) adhere to [Semantic Versioning](https://semver.or
 - Use arrays in some functions like `Aggregate` so that we can benefit from using `for` loops without needing to allocate iterators or lambdas to combine the results
 - Renamed `ICombinationFilterNode` to simply `ICombinationFilter`
 - Removed `OrderedCombinationFilter` and added new parameter `PreserveOrder` to constructor of `CombinationFilter`.
+
+### Fixed
+
+- [3.0.1] fix: Collapsing a `CombinationFilter` should cause any inner `CombinationFilter`s of the same `Operator` to be flattened onto the outer `CombinationFilter`
