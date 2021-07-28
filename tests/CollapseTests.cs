@@ -117,5 +117,46 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
 
             Assert.Equal(expectedCollapsedFilter, collapsedFilter);
         }
+
+        [Theory]
+        [InlineData(CombinationOperator.All, CombinationOperator.Any)]
+        [InlineData(CombinationOperator.Any, CombinationOperator.All)]
+        public void Collapse_ShouldAbsorbRedundantNestedCombinations(CombinationOperator outerCombinationOperator, CombinationOperator alternateInnerCombinationOperator)
+        {
+            var filterA = new CharFilter('A');
+            var filterB = new CharFilter('B');
+            var filterC = new CharFilter('C');
+            var filterD = new CharFilter('D');
+            var filterE = new CharFilter('E');
+            var filterF = new CharFilter('F');
+            var filterG = new CharFilter('G');
+            var filterH = new CharFilter('H');
+
+            var innerCombinationFilterToFlatten = new CombinationFilter<CharFilter>(new[] { filterA, filterB }, outerCombinationOperator);
+            var innerCombinationFilterToRetain = new CombinationFilter<CharFilter>(new[] { filterC, filterD }, alternateInnerCombinationOperator);
+            var innerCombinationFilterToAbsorb = new CombinationFilter<CharFilter>(new[] { filterA, filterE }, alternateInnerCombinationOperator);
+
+            var outerCombinationFilter = new CombinationFilter<CharFilter>(new IFilterNode<CharFilter>[]
+            {
+                innerCombinationFilterToFlatten,
+                innerCombinationFilterToRetain,
+                innerCombinationFilterToAbsorb,
+                filterG,
+                filterH
+            }, outerCombinationOperator);
+
+            var collapsedFilter = outerCombinationFilter.Collapse();
+
+            var expectedCollapsedFilter = new CombinationFilter<CharFilter>(new IFilterNode<CharFilter>[]
+            {
+                filterA,
+                filterB,
+                filterG,
+                filterH,
+                innerCombinationFilterToRetain,
+            }, outerCombinationOperator);
+
+            Assert.Equal(expectedCollapsedFilter, collapsedFilter);
+        }
     }
 }
