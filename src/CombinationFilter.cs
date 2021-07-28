@@ -135,6 +135,59 @@ namespace ExtremeAndy.CombinatoryFilters
                 };
             }
 
+            IEnumerable<IFilterNode<TLeafNode>> Absorb(IEnumerable<IFilterNode<TLeafNode>> innerFilters)
+            {
+                var innerFiltersList = innerFilters.ToList();
+                var innerCombinationFiltersOfOppositeOperationToRetain = new HashSet<CombinationFilter<TLeafNode>>(
+                    innerFiltersList
+                        .OfType<CombinationFilter<TLeafNode>>()
+                        .Where(f => f.Operator != Operator));
+
+                var otherInnerFilters = innerFiltersList.Except(innerCombinationFiltersOfOppositeOperationToRetain)
+                    .ToList();
+
+                foreach (var filter in otherInnerFilters)
+                {
+                    var combinationFiltersToRemove = new List<CombinationFilter<TLeafNode>>();
+                    foreach (var combinationFilter in innerCombinationFiltersOfOppositeOperationToRetain)
+                    {
+                        // If the inner filters contains one of the outer filters, that means the inner filter is redundant,
+                        // so we can remove it, i.e. it is "absorbed" by the outer filter.
+                        if (combinationFilter.FiltersSet.Contains(filter))
+                        {
+                            combinationFiltersToRemove.Add(combinationFilter);
+                        }
+                    }
+
+                    foreach (var combinationFilter in combinationFiltersToRemove)
+                    {
+                        innerCombinationFiltersOfOppositeOperationToRetain.Remove(combinationFilter);
+                    }
+                }
+
+                if (PreserveOrder)
+                {
+                    // Select from the original list so order may be preserved, slightly more expensive operation
+                    return innerFiltersList.SelectMany(innerFilter =>
+                    {
+                        if (innerFilter is CombinationFilter<TLeafNode> combinationFilter
+                            && combinationFilter.Operator != Operator
+                            && !innerCombinationFiltersOfOppositeOperationToRetain.Contains(combinationFilter))
+                        {
+                            return Array.Empty<IFilterNode<TLeafNode>>();
+                        }
+
+                        return new[]
+                        {
+                            innerFilter
+                        };
+                    });
+                }
+
+                return otherInnerFilters
+                    .Concat(innerCombinationFiltersOfOppositeOperationToRetain);
+            }
+
             return Operator.Match(
                 () =>
                 {
@@ -146,11 +199,16 @@ namespace ExtremeAndy.CombinatoryFilters
                         return FilterNode<TLeafNode>.False;
                     }
 
+                    // Identity
                     var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.IsTrue());
 
+                    // Associativity
                     var flattenedNonTrivialFilters = nonTrivialFilters.SelectMany(Flatten);
 
-                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(flattenedNonTrivialFilters, Operator, PreserveOrder, isCollapsed: true);
+                    // Absorption
+                    var absorbedFilters = Absorb(flattenedNonTrivialFilters);
+
+                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(absorbedFilters, Operator, PreserveOrder, isCollapsed: true);
                     return collapsedCombinationFilter.Filters.Count == 1
                         ? collapsedCombinationFilter.Filters.Single()
                         : collapsedCombinationFilter;
@@ -165,11 +223,16 @@ namespace ExtremeAndy.CombinatoryFilters
                         return FilterNode<TLeafNode>.True;
                     }
 
+                    // Identity
                     var nonTrivialFilters = collapsedInnerFilters.Where(f => !f.IsFalse());
 
+                    // Associativity
                     var flattenedNonTrivialFilters = nonTrivialFilters.SelectMany(Flatten);
 
-                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(flattenedNonTrivialFilters, Operator, PreserveOrder, isCollapsed: true);
+                    // Absorption
+                    var absorbedFilters = Absorb(flattenedNonTrivialFilters);
+
+                    var collapsedCombinationFilter = new CombinationFilter<TLeafNode>(absorbedFilters, Operator, PreserveOrder, isCollapsed: true);
                     return collapsedCombinationFilter.Filters.Count == 1
                         ? collapsedCombinationFilter.Filters.Single()
                         : collapsedCombinationFilter;
