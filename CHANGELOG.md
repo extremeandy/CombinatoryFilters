@@ -15,4 +15,5 @@ and this project (will try to) adhere to [Semantic Versioning](https://semver.or
 
 ### Fixed
 
-- [3.0.1] fix: Collapsing a `CombinationFilter` should cause any inner `CombinationFilter`s of the same `Operator` to be flattened onto the outer `CombinationFilter`
+- [3.0.2] Collapsing a `CombinationFilter` should cause any inner `CombinationFilter`s of the same `Operator` to be flattened onto the outer `CombinationFilter`
+- [3.0.3] Collapsing a `CombinationFilter` should cause any inner `CombinationFilter`s of the opposite `Operator` to be absorbed if the inner filters contains one of the outer filters

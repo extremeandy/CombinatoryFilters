@@ -117,5 +117,48 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
 
             Assert.Equal(expectedCollapsedFilter, collapsedFilter);
         }
+
+        [Theory]
+        [InlineData(CombinationOperator.All, CombinationOperator.Any, false)]
+        [InlineData(CombinationOperator.Any, CombinationOperator.All, false)]
+        [InlineData(CombinationOperator.All, CombinationOperator.Any, true)]
+        [InlineData(CombinationOperator.Any, CombinationOperator.All, true)]
+        public void Collapse_ShouldAbsorbRedundantNestedCombinations(CombinationOperator outerCombinationOperator, CombinationOperator alternateInnerCombinationOperator, bool preserveOrder)
+        {
+            var filterA = new CharFilter('A');
+            var filterB = new CharFilter('B');
+            var filterC = new CharFilter('C');
+            var filterD = new CharFilter('D');
+            var filterE = new CharFilter('E');
+            var filterF = new CharFilter('F');
+            var filterG = new CharFilter('G');
+            var filterH = new CharFilter('H');
+
+            var innerCombinationFilterToFlatten = new CombinationFilter<CharFilter>(new[] { filterA, filterB }, outerCombinationOperator, preserveOrder);
+            var innerCombinationFilterToRetain = new CombinationFilter<CharFilter>(new[] { filterC, filterD }, alternateInnerCombinationOperator, preserveOrder);
+            var innerCombinationFilterToAbsorb = new CombinationFilter<CharFilter>(new[] { filterA, filterE }, alternateInnerCombinationOperator, preserveOrder);
+
+            var outerCombinationFilter = new CombinationFilter<CharFilter>(new IFilterNode<CharFilter>[]
+            {
+                innerCombinationFilterToFlatten,
+                innerCombinationFilterToRetain,
+                innerCombinationFilterToAbsorb,
+                filterG,
+                filterH
+            }, outerCombinationOperator, preserveOrder);
+
+            var collapsedFilter = outerCombinationFilter.Collapse();
+
+            var expectedCollapsedFilter = new CombinationFilter<CharFilter>(new IFilterNode<CharFilter>[]
+            {
+                filterA,
+                filterB,
+                innerCombinationFilterToRetain,
+                filterG,
+                filterH,
+            }, outerCombinationOperator, preserveOrder);
+
+            Assert.Equal(expectedCollapsedFilter, collapsedFilter);
+        }
     }
 }
