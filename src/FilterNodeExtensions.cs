@@ -6,23 +6,18 @@ namespace ExtremeAndy.CombinatoryFilters
 {
     public static partial class FilterNodeExtensions
     {
-        public static InvertedFilter<TLeafNode> Invert<TLeafNode>(this IFilterNode<TLeafNode> filter)
-            where TLeafNode : class, ILeafFilterNode
-        {
-            return new InvertedFilter<TLeafNode>(filter);
-        }
+        public static InvertedFilterNode<TFilter> Invert<TFilter>(this IFilterNode<TFilter> filterNode)
+            where TFilter : IFilter
+            => new InvertedFilterNode<TFilter>(filterNode);
 
         // TODO: Maybe this can be made private/internal?
-        public static Func<TItemToTest, bool> GetPredicate<TLeafNode, TItemToTest>(
-            this IFilterNode<TLeafNode> filter,
-            Func<TLeafNode, Func<TItemToTest, bool>> itemPredicate)
-            where TLeafNode : class, ILeafFilterNode
-        {
-            return filter.Aggregate(
+        public static Func<TItemToTest, bool> GetPredicate<TFilter, TItemToTest>(
+            this IFilterNode<TFilter> filterNode,
+            Func<TFilter, Func<TItemToTest, bool>> itemPredicate)
+            => filterNode.Aggregate(
                 Combine,
                 Invert,
-                itemPredicate);
-        }
+                leafFilterNode => itemPredicate(leafFilterNode.Filter));
 
         /// <summary>
         /// Computes the filter that includes only leaf filters that satisfy the given predicate.
@@ -30,18 +25,30 @@ namespace ExtremeAndy.CombinatoryFilters
         /// This means that it will never filter out results that the original filter would not have
         /// filtered.
         /// </summary>
-        /// <param name="filter"></param>
+        /// <param name="node"></param>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public static IFilterNode<TLeafNode> GetPartial<TLeafNode>(this IFilterNode<TLeafNode> filter, Func<TLeafNode, bool> predicate)
-            where TLeafNode : class, ILeafFilterNode
-            => filter.Relax(
-                leafFilter => predicate(leafFilter)
-                    ? (IFilterNode<TLeafNode>) leafFilter
-                    : FilterNode<TLeafNode>.True,
-                leafFilter => predicate(leafFilter)
-                    ? (IFilterNode<TLeafNode>) leafFilter
-                    : FilterNode<TLeafNode>.False);
+        public static IFilterNode<TFilter> GetPartial<TFilter>(this IFilterNode<TFilter> node, Func<TFilter, bool> predicate)
+            where TFilter : IFilter
+            => node.Relax(
+                filter =>
+                {
+                    if (predicate(filter))
+                    {
+                        return filter.ToLeafFilterNode();
+                    }
+
+                    return FilterNode<TFilter>.True;
+                },
+                filter =>
+                {
+                    if (predicate(filter))
+                    {
+                        return filter.ToLeafFilterNode();
+                    }
+
+                    return FilterNode<TFilter>.False;
+                });
 
         internal static Func<TItemToTest, bool> Combine<TItemToTest>(
             Func<TItemToTest, bool>[] innerResults,
@@ -81,87 +88,85 @@ namespace ExtremeAndy.CombinatoryFilters
         internal static Func<TItemToTest, bool> Invert<TItemToTest>(Func<TItemToTest, bool> innerResult)
             => relatedItemCollection => !innerResult(relatedItemCollection);
 
-        public static async Task<TResult> MatchAsync<TLeafNode, TResult>(
-            this IFilterNode<TLeafNode> filter,
-            Func<ICombinationFilter<TLeafNode>, TResult> combine,
-            Func<IInvertedFilter<TLeafNode>, TResult> invert,
-            Func<TLeafNode, Task<TResult>> transform)
-            where TLeafNode : class, ILeafFilterNode
+        public static async Task<TResult> MatchAsync<TFilter, TResult>(
+            this IFilterNode<TFilter> node,
+            Func<ICombinationFilterNode<TFilter>, TResult> combine,
+            Func<IInvertedFilterNode<TFilter>, TResult> invert,
+            Func<ILeafFilterNode<TFilter>, Task<TResult>> transform)
         {
-            switch (filter)
+            switch (node)
             {
-                case ICombinationFilter<TLeafNode> combinationFilter:
-                    return combine(combinationFilter);
-                case IInvertedFilter<TLeafNode> invertedFilter:
-                    return invert(invertedFilter);
-                case TLeafNode leafFilter:
-                    return await transform(leafFilter);
+                case ICombinationFilterNode<TFilter> combinationNode:
+                    return combine(combinationNode);
+                case IInvertedFilterNode<TFilter> invertedNode:
+                    return invert(invertedNode);
+                case ILeafFilterNode<TFilter> leafNode:
+                    return await transform(leafNode);
                 default:
-                    throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
+                    throw new InvalidOperationException($"Unhandled {nameof(node)} of type: {node.GetType()}");
             }
         }
 
-        public static async Task<TResult> MatchAsync<TLeafNode, TResult>(
-            this IFilterNode<TLeafNode> filter,
-            Func<ICombinationFilter<TLeafNode>, Task<TResult>> combine,
-            Func<IInvertedFilter<TLeafNode>, Task<TResult>> invert,
-            Func<TLeafNode, Task<TResult>> transform)
-            where TLeafNode : class, ILeafFilterNode
+        public static async Task<TResult> MatchAsync<TFilter, TResult>(
+            this IFilterNode<TFilter> filter,
+            Func<ICombinationFilterNode<TFilter>, Task<TResult>> combine,
+            Func<IInvertedFilterNode<TFilter>, Task<TResult>> invert,
+            Func<ILeafFilterNode<TFilter>, Task<TResult>> transform)
         {
             switch (filter)
             {
-                case ICombinationFilter<TLeafNode> combinationFilter:
+                case ICombinationFilterNode<TFilter> combinationFilter:
                     return await combine(combinationFilter);
-                case IInvertedFilter<TLeafNode> invertedFilter:
+                case IInvertedFilterNode<TFilter> invertedFilter:
                     return await invert(invertedFilter);
-                case TLeafNode leafFilter:
+                case ILeafFilterNode<TFilter> leafFilter:
                     return await transform(leafFilter);
                 default:
                     throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
             }
         }
 
-        public static async Task<IFilterNode<TResultLeafNode>> MapAsync<TLeafNode, TResultLeafNode>(
-            this IFilterNode<TLeafNode> filter,
-            Func<TLeafNode, Task<TResultLeafNode>> mapFunc)
-            where TLeafNode : class, ILeafFilterNode
-            where TResultLeafNode : class, ILeafFilterNode
+        public static async Task<IFilterNode<TResultFilter>> MapAsync<TFilter, TResultFilter>(
+            this IFilterNode<TFilter> filter,
+            Func<TFilter, Task<TResultFilter>> mapFunc)
+            where TFilter : IFilter
+            where TResultFilter : IFilter
         {
             switch (filter)
             {
-                case ICombinationFilter<TLeafNode> combinationFilter:
-                    var innerFilterTasks = combinationFilter.Filters.Select(f => f.MapAsync(mapFunc));
-                    var innerFilters = await Task.WhenAll(innerFilterTasks);
-                    return new CombinationFilter<TResultLeafNode>(innerFilters, combinationFilter.Operator, combinationFilter.PreserveOrder);
-                case IInvertedFilter<TLeafNode> invertedFilter:
-                    var innerFilter = await invertedFilter.FilterToInvert.MapAsync(mapFunc);
-                    return new InvertedFilter<TResultLeafNode>(innerFilter);
-                case TLeafNode leafFilter:
-                    return (IFilterNode<TResultLeafNode>)await mapFunc(leafFilter);
+                case ICombinationFilterNode<TFilter> combinationFilter:
+                    var innerNodesTasks = combinationFilter.Nodes.Select(f => f.MapAsync(mapFunc));
+                    var innerNodes = await Task.WhenAll(innerNodesTasks);
+                    return new CombinationFilterNode<TResultFilter>(innerNodes, combinationFilter.Operator);
+                case IInvertedFilterNode<TFilter> invertedFilter:
+                    var innerNodeToInvert = await invertedFilter.NodeToInvert.MapAsync(mapFunc);
+                    return new InvertedFilterNode<TResultFilter>(innerNodeToInvert);
+                case ILeafFilterNode<TFilter> leafFilter:
+                    return (await mapFunc(leafFilter.Filter)).ToLeafFilterNode();
                 default:
                     throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
             }
         }
 
         /// <summary>
-        /// Removes non-matching nodes and replaces them with <see cref="FilterNode{TLeafNode}.True"/>
+        /// Removes non-matching nodes and replaces them with <see cref="FilterNode{TFilter}.True"/>
         /// </summary>
-        /// <typeparam name="TLeafNode"></typeparam>
+        /// <typeparam name="TFilter"></typeparam>
         /// <param name="filter"></param>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public static IFilterNode<TLeafNode> Where<TLeafNode>(
-            this IFilterNode<TLeafNode> filter,
-            Func<TLeafNode, bool> predicate)
-            where TLeafNode : class, ILeafFilterNode
-            => filter.Bind(leafFilter =>
+        public static IFilterNode<TFilter> Where<TFilter>(
+            this IFilterNode<TFilter> filter,
+            Func<TFilter, bool> predicate)
+            where TFilter : IFilter
+            => filter.Bind<TFilter>(leafFilter =>
             {
                 if (predicate(leafFilter))
                 {
-                    return (IFilterNode<TLeafNode>)leafFilter;
+                    return leafFilter.ToLeafFilterNode();
                 }
 
-                return FilterNode<TLeafNode>.True;
+                return FilterNode<TFilter>.True;
             });
     }
 }

@@ -13,32 +13,76 @@ dotnet add package ExtremeAndy.CombinatoryFilters
 1. Define your filter interface(s) and/or class(es). Here's an example of a simple filter which checks whether an integer is between `UpperBound` and `LowerBound`.
 
 ```csharp
-public class NumericRangeFilter : LeafFilterNode<NumericRangeFilter>, IRealisableLeafFilterNode<int>
+public class NumericRangeFilter : Filter<int>
 {
-    public NumericRangeFilter(int lowerBound, int upperBound)
-    {
-        LowerBound = lowerBound;
-        UpperBound = upperBound;
-    }
+	public NumericRangeFilter(int lowerBound, int upperBound)
+	{
+		LowerBound = lowerBound;
+		UpperBound = upperBound;
+	}
 
-    public int LowerBound { get; }
+	public int LowerBound { get; }
 
-    public int UpperBound { get; }
+	public int UpperBound { get; }
 
-    public bool IsMatch(int item) => LowerBound <= item && item <= UpperBound;
+	public override bool IsMatch(int item) => LowerBound <= item && item <= UpperBound;
 }
 ```
 
-2. Optionally implement `IEquatable<IFilterNode>` on your filter class. If this is not done, then calling `.Equals()` on an `IFilterNode` in your filter tree will default to reference equality when comparing your leaf filters.
+2. Optionally implement `IEquatable<NumericRangeFilter>` on your filter class. If this is not done, then calling `.Equals()` on an `IFilterNode` in your filter tree will default to value/reference equality when comparing your leaf filters.
 
-3. Create an instance of your filter and apply it to some values
+    <details>
+        <summary>Example code</summary>
+        
+    ```csharp
+    public class NumericRangeFilter : Filter<int>, IEquatable<NumericRangeFilter>
+    {
+        public NumericRangeFilter(int lowerBound, int upperBound)
+        {
+            LowerBound = lowerBound;
+            UpperBound = upperBound;
+        }
+
+        public int LowerBound { get; }
+
+        public int UpperBound { get; }
+
+        public override bool IsMatch(int item) => LowerBound <= item && item <= UpperBound;
+
+        public bool Equals(NumericRangeFilter other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            return LowerBound == other.LowerBound
+                && UpperBound == other.UpperBound;
+        }
+
+        public override bool Equals(object obj)
+            => obj is NumericRangeFilter other && Equals(other);
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (LowerBound.GetHashCode() * 397) ^ UpperBound.GetHashCode();
+            }
+        }
+    }
+    ```
+    </details>
+
+4. Create an instance of your filter and apply it to some values
 
 ```csharp
 var filter = new NumericRangeFilter(5, 10);
+var filterNode = filter.ToLeafFilterNode();
 var values = new[] { 1, 3, 5, 9, 11 };
 var expectedFilteredValues = new[] { 5, 9 };
 
-var filterPredicate = filter.GetPredicate<NumericRangeFilter, int>();
+var filterPredicate = filterNode.GetPredicate<NumericRangeFilter, int>();
 var filteredValues = values.Where(filterPredicate);
 
 Assert.Equal(expectedFilteredValues, filteredValues);
@@ -51,9 +95,9 @@ You can assemble arbitrarily complex filters as follows:
 ```csharp
 var filter5To10 = new NumericRangeFilter(5, 10);
 var filter8To15 = new NumericRangeFilter(8, 15);
-var filter5To10Or8To15 = new CombinationFilter<NumericRangeFilter>(new[] { filter5To10, filter8To15 }, CombinationOperator.Any);
+var filter5To10Or8To15 = new CombinationFilterNode<NumericRangeFilter>(new[] { filter5To10, filter8To15 }, CombinationOperator.Any);
 var filter9To12 = new NumericRangeFilter(9, 12);
-var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[] { filter5To10Or8To15, filter9To12 }, CombinationOperator.All);
+var filter = new CombinationFilterNode<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[] { filter5To10Or8To15, filter9To12.ToLeafFilterNode() }, CombinationOperator.All);
 ```
 
 #### Inversion
@@ -65,22 +109,26 @@ Any filter can be inverted using `.Invert()`.
 You can test a single value as follows:
 
 ```csharp
-var filter = new NumericRangeFilter(5, 10);
-var isMatch = filter.IsMatch(7);
+var filter5To10 = new NumericRangeFilter(5, 10);
+var filter8To15 = new NumericRangeFilter(8, 15);
+var combinationFilter = new CombinationFilterNode<NumericRangeFilter>(new[] { filter5To10, filter8To15 });
+var isMatch = combinationFilter.IsMatch(7);
 ```
 
 However, `IsMatch` causes an allocation and is not recommended for testing many items. Instead, use `filter.GetPredicate`:
 
 ```csharp
-var filter = new NumericRangeFilter(5, 10);
-var filterPredicate = filter.GetPredicate<NumericRangeFilter, int>();
+var filter5To10 = new NumericRangeFilter(5, 10);
+var filter8To15 = new NumericRangeFilter(8, 15);
+var combinationFilter = new CombinationFilterNode<NumericRangeFilter>(new[] { filter5To10, filter8To15 });
+var filterPredicate = combinationFilter.GetPredicate<NumericRangeFilter, int>();
 var lotsOfIntegers = Enumerable.Range(0, 1000000);
 var matches = lotsOfIntegers.Where(filterPredicate);
 ```
 
 ### Preserving ordering of filters
 
-`CombinationFilter` defaults to storing filters as a `HashSet<T>`. If you wish to preserve the order of your filters, pass `preserveOrder: true` in the constructor of `CombinationFilter`.
+`CombinationFilterNode` stores `Nodes` in the same order they are passed in. Operations such as `Collapse` should still preserve the order of `Nodes`, but this is not well tested.
 
 ## Advanced usage
 
@@ -122,10 +170,10 @@ Here is a contrived example (_note: this doesn't do anything useful, just demons
 
 ```csharp
 // All the numbers from -5 to 10, excluding numbers from 2 to 6
-var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[]
+var filter = new CombinationFilterNode<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[]
 {
-    new NumericRangeFilter(-5, 10),
-    new InvertedFilter<NumericRangeFilter>(new NumericRangeFilter(2, 6)),
+    new NumericRangeFilter(-5, 10).ToLeafFilterNode(),
+    new NumericRangeFilter(2, 6).ToLeafFilterNode().Invert()
 }, CombinationOperator.All);
 
 // Exclude filters with negative values

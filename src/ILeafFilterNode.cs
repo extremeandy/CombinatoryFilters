@@ -2,10 +2,11 @@
 {
     public interface ILeafFilterNode : IFilterNode
     {
+        IFilter Filter { get; }
     }
 
-    public interface ILeafFilterNode<out TThis> : IFilterNode<TThis>, ILeafFilterNode
-        where TThis : class, ILeafFilterNode<TThis>
+    public interface ILeafFilterNode<out TFilter> : IFilterNode<TFilter>, ILeafFilterNode
     {
+        new TFilter Filter { get; }
     }
 }

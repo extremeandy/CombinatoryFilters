@@ -1,35 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ExtremeAndy.CombinatoryFilters
 {
-    public interface IFilterNode
+    public interface IFilterNode : IEquatable<IFilterNode>
     {
-    }
+        bool IsCollapsed { get; }
 
-    public interface IFilterNode<out TLeafNode> : IFilterNode
-        where TLeafNode : class, ILeafFilterNode
-    {
-        TResult Aggregate<TResult>(
-            Func<TResult[], CombinationOperator, TResult> combine,
-            Func<TResult, TResult> invert,
-            Func<TLeafNode, TResult> transform);
+        /// <summary>
+        /// As for <see cref="IEquatable{T}.Equals"/>, but uses an unordered set comparison
+        /// operation which ignores duplicates and order of nodes.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        bool IsEquivalentTo(IFilterNode other);
 
-        TResult Match<TResult>(
-            Func<ICombinationFilter<TLeafNode>, TResult> combine,
-            Func<IInvertedFilter<TLeafNode>, TResult> invert,
-            Func<TLeafNode, TResult> transform);
-
-        IFilterNode<TResultLeafNode> Map<TResultLeafNode>(Func<TLeafNode, TResultLeafNode> mapFunc)
-            where TResultLeafNode : class, ILeafFilterNode;
-
-        IFilterNode<TResultLeafNode> Bind<TResultLeafNode>(Func<TLeafNode, IFilterNode<TResultLeafNode>> bindFunc)
-            where TResultLeafNode : class, ILeafFilterNode;
-
-        IFilterNode<TLeafNode> Collapse();
-
-        bool Any(Func<TLeafNode, bool> predicate);
-
-        bool All(Func<TLeafNode, bool> predicate);
+        IFilterNode Collapse();
 
         /// <summary>
         /// Returns <see langword="true" /> if the filter is will always evaluate to <see langword="true" />
@@ -56,5 +42,35 @@ namespace ExtremeAndy.CombinatoryFilters
         /// </summary>
         /// <returns></returns>
         bool IsFalse();
+    }
+
+    public interface IFilterNode<out TFilter> : IFilterNode
+    {
+        TResult Aggregate<TResult>(
+            Func<TResult[], CombinationOperator, TResult> combine,
+            Func<TResult, TResult> invert,
+            Func<ILeafFilterNode<TFilter>, TResult> transform);
+
+        TResult Match<TResult>(
+            Func<ICombinationFilterNode<TFilter>, TResult> combine,
+            Func<IInvertedFilterNode<TFilter>, TResult> invert,
+            Func<ILeafFilterNode<TFilter>, TResult> transform);
+
+        IFilterNode<TResultFilter> Map<TResultFilter>(Func<TFilter, TResultFilter> mapFunc)
+            where TResultFilter : IFilter;
+
+        IFilterNode<TResultFilter> Bind<TResultFilter>(Func<TFilter, IFilterNode<TResultFilter>> bindFunc)
+            where TResultFilter : IFilter;
+
+        /// <summary>
+        /// Sort the nodes according to the supplied <see cref="FilterNodeComparer{TFilter}"/>.
+        /// </summary>
+        IFilterNode<TFilter> Sort(IComparer<IFilterNode<TFilter>> comparer);
+
+        IFilterNode<TFilter> Collapse();
+
+        bool Any(Func<TFilter, bool> predicate);
+
+        bool All(Func<TFilter, bool> predicate);
     }
 }

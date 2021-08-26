@@ -2,7 +2,7 @@ using System;
 
 namespace ExtremeAndy.CombinatoryFilters.Tests
 {
-    public class CharFilter : LeafFilterNode<CharFilter>, IRealisableLeafFilterNode<string>, IEquatable<IFilterNode>
+    public class CharFilter : Filter<string>, IEquatable<CharFilter>, IComparable<CharFilter>
     {
         public CharFilter(char c)
         {
@@ -11,21 +11,38 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
 
         public char Character { get; }
 
-        public bool Equals(IFilterNode other)
+        public bool Equals(CharFilter other)
         {
-            return other is CharFilter charOther
-                   && Character == charOther.Character;
+            if (other is null)
+            {
+                return false;
+            }
+
+            return Character == other.Character;
         }
 
         public override bool Equals(object obj)
-        {
-            return obj is IFilterNode other && Equals(other);
-        }
+            => obj is CharFilter other && Equals(other);
 
         public override int GetHashCode() => Character.GetHashCode();
 
-        public bool IsMatch(string item) => item.Contains(Character);
+        public override bool IsMatch(string item) => item.Contains(Character);
 
         public override string ToString() => $"'{Character}'";
+
+        public int CompareTo(CharFilter other)
+        {
+            if (ReferenceEquals(this, other))
+            {
+                return 0;
+            }
+
+            if (ReferenceEquals(null, other))
+            {
+                return 1;
+            }
+
+            return Character.CompareTo(other.Character);
+        }
     }
 }
