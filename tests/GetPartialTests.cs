@@ -20,10 +20,10 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
         public void GetPartial_Example()
         {
             // All the numbers from -5 to 10, EXCEPT numbers from 2 to 6
-            var filter = new CombinationFilter<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[]
+            var filter = new CombinationFilterNode<NumericRangeFilter>(new IFilterNode<NumericRangeFilter>[]
             {
-                new NumericRangeFilter(-5, 10),
-                new InvertedFilter<NumericRangeFilter>(new NumericRangeFilter(2, 6)), 
+                new LeafFilterNode<NumericRangeFilter>(new NumericRangeFilter(-5, 10)),
+                new InvertedFilterNode<NumericRangeFilter>(new NumericRangeFilter(2, 6)), 
             }, CombinationOperator.All);
 
             // Exclude filters with negative values
@@ -53,8 +53,8 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
                     }
 
                     return inner.Match(
-                        combine => combine.Filters.Any(f => IsComplexInner(f, invertedCount)),
-                        invert => IsComplexInner(invert.FilterToInvert, invertedCount + 1),
+                        combine => combine.Nodes.Any(f => IsComplexInner(f, invertedCount)),
+                        invert => IsComplexInner(invert.NodeToInvert, invertedCount + 1),
                         leaf => false);
                 }
 
@@ -71,7 +71,8 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
             {
                 var numSets = _random.Next(1000);
 
-                var strings = Enumerable.Range(1, numSets).Select(_ => _generator.GetRandomString(_random.Next(RandomCharFilterGenerator.Chars.Length)))
+                var strings = Enumerable.Range(1, numSets)
+                    .Select(_ => _generator.GetRandomString(_random.Next(RandomCharFilterGenerator.Chars.Length)))
                     .ToHashSet();
 
                 const int nodeCount = 10;

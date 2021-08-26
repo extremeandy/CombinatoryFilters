@@ -5,24 +5,24 @@ namespace ExtremeAndy.CombinatoryFilters
     public static partial class FilterNodeExtensions
     {
         /// <summary>
-        /// 'Restricts' a filter by restricting each leaf of the filter according to <see cref="restrictItemFilterFunc"/>, or restricting
-        /// inversions according to <see cref="relaxedItemFilterFunc"/>.
+        /// 'Restricts' a filter by restricting each leaf of the filter according to <see cref="restrictFilterFunc"/>, or restricting
+        /// inversions according to <see cref="relaxFilterFunc"/>.
         ///
-        /// This is the inverse operation of <see cref="Relax{TLeafNode}"/>.
+        /// This is the inverse operation of <see cref="Relax{TFilter}"/>.
         /// </summary>
         /// <param name="filter"></param>
-        /// <param name="restrictItemFilterFunc">
+        /// <param name="restrictFilterFunc">
         /// A function which takes a leaf node and restricts it (i.e. the inverse operation of relax).
         /// </param>
-        /// <param name="relaxedItemFilterFunc">
+        /// <param name="relaxFilterFunc">
         /// A function which takes a leaf node and relaxes it
         /// </param>
         /// <returns></returns>
-        public static IFilterNode<TLeafNode> Restrict<TLeafNode>(
-            this IFilterNode<TLeafNode> filter,
-            Func<TLeafNode, IFilterNode<TLeafNode>> restrictItemFilterFunc,
-            Func<TLeafNode, IFilterNode<TLeafNode>> relaxedItemFilterFunc)
-            where TLeafNode : class, ILeafFilterNode
-            => Relax(filter, restrictItemFilterFunc, relaxedItemFilterFunc);
+        public static IFilterNode<TFilter> Restrict<TFilter>(
+            this IFilterNode<TFilter> filter,
+            Func<TFilter, IFilterNode<TFilter>> restrictFilterFunc,
+            Func<TFilter, IFilterNode<TFilter>> relaxFilterFunc)
+            where TFilter : IFilter
+            => Relax(filter, restrictFilterFunc, relaxFilterFunc);
     }
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace ExtremeAndy.CombinatoryFilters.Tests
 {
-    public class NumericRangeFilter : LeafFilterNode<NumericRangeFilter>, IRealisableLeafFilterNode<int>, IEquatable<IFilterNode>
+    public class NumericRangeFilter : Filter<int>, IEquatable<NumericRangeFilter>, IComparable<NumericRangeFilter>
     {
         public NumericRangeFilter(int lowerBound, int upperBound)
         {
@@ -14,17 +14,19 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
 
         public int UpperBound { get; }
 
-        public bool Equals(IFilterNode other)
+        public bool Equals(NumericRangeFilter other)
         {
-            return other is NumericRangeFilter numericRangeOther
-                   && LowerBound == numericRangeOther.LowerBound
-                   && UpperBound == numericRangeOther.UpperBound;
+            if (other is null)
+            {
+                return false;
+            }
+
+            return LowerBound == other.LowerBound
+                   && UpperBound == other.UpperBound;
         }
 
         public override bool Equals(object obj)
-        {
-            return obj is IFilterNode other && Equals(other);
-        }
+            => obj is NumericRangeFilter other && Equals(other);
 
         public override int GetHashCode()
         {
@@ -34,8 +36,26 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
             }
         }
 
-        public bool IsMatch(int item) => LowerBound <= item && item <= UpperBound;
+        public override bool IsMatch(int item) => LowerBound <= item && item <= UpperBound;
 
         public override string ToString() => $"{LowerBound} to {UpperBound}";
+
+        public int CompareTo(NumericRangeFilter other)
+        {
+            if (ReferenceEquals(this, other))
+            {
+                return 0;
+            }
+
+            if (ReferenceEquals(null, other))
+            {
+                return 1;
+            }
+
+            var lowerBoundComparison = LowerBound.CompareTo(other.LowerBound);
+            return lowerBoundComparison != 0
+                ? lowerBoundComparison
+                : UpperBound.CompareTo(other.UpperBound);
+        }
     }
 }

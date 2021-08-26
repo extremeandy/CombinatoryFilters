@@ -56,13 +56,13 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
                             ? CombinationOperator.All
                             : CombinationOperator.Any;
 
-                        return new CombinationFilter<CharFilter>(children, combinationOperator);
+                        return new CombinationFilterNode<CharFilter>(children, combinationOperator);
                     case 1:
                         nodeCount--;
-                        return new InvertedFilter<CharFilter>(GetRandomFilterInner(false, true));
+                        return new InvertedFilterNode<CharFilter>(GetRandomFilterInner(false, true));
                     default:
                         nodeCount--;
-                        return new CharFilter(GetRandomChar());
+                        return new CharFilter(GetRandomChar()).ToLeafFilterNode();
                 }
             }
 

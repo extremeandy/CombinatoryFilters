@@ -6,32 +6,32 @@ namespace ExtremeAndy.CombinatoryFilters
     public static partial class FilterNodeExtensions
     {
         /// <summary>
-        /// 'Relaxes' a filter by relaxing each leaf of the filter according to <see cref="relaxedItemFilterFunc"/>, or restricting
-        /// inversions according to <see cref="restrictItemFilterFunc"/>.
+        /// 'Relaxes' a filter by relaxing each leaf of the filter according to <see cref="relaxFilterFunc"/>, or restricting
+        /// inversions according to <see cref="restrictFilterFunc"/>.
         ///
-        /// This is the inverse operation of <see cref="Restrict{TLeafNode}"/>.
+        /// This is the inverse operation of <see cref="Restrict{TFilter}"/>.
         /// </summary>
         /// <param name="filter"></param>
-        /// <param name="relaxedItemFilterFunc">
+        /// <param name="relaxFilterFunc">
         /// A function which takes a leaf node and relaxes it
         /// </param>
-        /// <param name="restrictItemFilterFunc">
+        /// <param name="restrictFilterFunc">
         /// A function which takes a leaf node and restricts it (i.e. the inverse operation of relax).
         /// </param>
         /// <returns></returns>
-        public static IFilterNode<TLeafNode> Relax<TLeafNode>(
-            this IFilterNode<TLeafNode> filter,
-            Func<TLeafNode, IFilterNode<TLeafNode>> relaxedItemFilterFunc,
-            Func<TLeafNode, IFilterNode<TLeafNode>> restrictItemFilterFunc)
-            where TLeafNode : class, ILeafFilterNode
+        public static IFilterNode<TFilter> Relax<TFilter>(
+            this IFilterNode<TFilter> filter,
+            Func<TFilter, IFilterNode<TFilter>> relaxFilterFunc,
+            Func<TFilter, IFilterNode<TFilter>> restrictFilterFunc)
+            where TFilter : IFilter
             => filter.Match(
-                    combinationFilter =>
+                    combinationFilterNode =>
                     {
-                        var innerFilters = combinationFilter.Filters.Select(f => Relax(f, relaxedItemFilterFunc, restrictItemFilterFunc));
-                        return new CombinationFilter<TLeafNode>(innerFilters, combinationFilter.Operator, combinationFilter.PreserveOrder);
+                        var innerNodes = combinationFilterNode.Nodes.Select(f => Relax(f, relaxFilterFunc, restrictFilterFunc));
+                        return new CombinationFilterNode<TFilter>(innerNodes, combinationFilterNode.Operator);
                     },
-                    invertedFilter => new InvertedFilter<TLeafNode>(Restrict(invertedFilter.FilterToInvert, restrictItemFilterFunc, relaxedItemFilterFunc)),
-                    relaxedItemFilterFunc)
+                    invertedFilterNode => new InvertedFilterNode<TFilter>(Restrict(invertedFilterNode.NodeToInvert, restrictFilterFunc, relaxFilterFunc)),
+                    leafFilterNode => relaxFilterFunc(leafFilterNode.Filter))
                 .Collapse();
     }
 }

@@ -7,33 +7,33 @@ namespace ExtremeAndy.CombinatoryFilters
     public static partial class FilterNodeExtensions
     {
         /// <summary>
-        /// 'Relaxes' a filter by relaxing each leaf of the filter according to <see cref="relaxedItemFilterFunc"/>, or restricting
-        /// inversions according to <see cref="restrictItemFilterFunc"/>.
+        /// 'Relaxes' a filter by relaxing each leaf of the filter according to <see cref="relaxFilterFunc"/>, or restricting
+        /// inversions according to <see cref="restrictFilterFunc"/>.
         ///
         /// This is the inverse operation of <see cref="RestrictAsync{T}"/>.
         /// </summary>
         /// <param name="filter"></param>
-        /// <param name="relaxedItemFilterFunc">
+        /// <param name="relaxFilterFunc">
         /// A function which takes a leaf node and relaxes it
         /// </param>
-        /// <param name="restrictItemFilterFunc">
+        /// <param name="restrictFilterFunc">
         /// A function which takes a leaf node and restricts it (i.e. the inverse operation of relax).
         /// </param>
         /// <returns></returns>
-        public static async Task<IFilterNode<TLeafNode>> RelaxAsync<TLeafNode>(
-            this IFilterNode<TLeafNode> filter,
-            Func<TLeafNode, Task<IFilterNode<TLeafNode>>> relaxedItemFilterFunc,
-            Func<TLeafNode, Task<IFilterNode<TLeafNode>>> restrictItemFilterFunc)
-            where TLeafNode : class, ILeafFilterNode
-            => (await filter.Match<Task<IFilterNode<TLeafNode>>>(
-                async combinationFilter =>
+        public static async Task<IFilterNode<TFilter>> RelaxAsync<TFilter>(
+            this IFilterNode<TFilter> filter,
+            Func<TFilter, Task<IFilterNode<TFilter>>> relaxFilterFunc,
+            Func<TFilter, Task<IFilterNode<TFilter>>> restrictFilterFunc)
+            where TFilter : IFilter
+            => (await filter.Match<Task<IFilterNode<TFilter>>>(
+                async combinationFilterNode =>
                 {
-                    var innerFilterTasks = combinationFilter.Filters.Select(f => RelaxAsync(f, relaxedItemFilterFunc, restrictItemFilterFunc));
-                    var innerFilters = await Task.WhenAll(innerFilterTasks);
-                    return new CombinationFilter<TLeafNode>(innerFilters, combinationFilter.Operator, combinationFilter.PreserveOrder);
+                    var innerFilterNodeTasks = combinationFilterNode.Nodes.Select(f => RelaxAsync(f, relaxFilterFunc, restrictFilterFunc));
+                    var innerFilterNodes = await Task.WhenAll(innerFilterNodeTasks);
+                    return new CombinationFilterNode<TFilter>(innerFilterNodes, combinationFilterNode.Operator);
                 },
-                async invertedFilter => new InvertedFilter<TLeafNode>(await RestrictAsync(invertedFilter.FilterToInvert, restrictItemFilterFunc, relaxedItemFilterFunc)),
-                relaxedItemFilterFunc))
+                async invertedFilterNode => new InvertedFilterNode<TFilter>(await RestrictAsync(invertedFilterNode.NodeToInvert, restrictFilterFunc, relaxFilterFunc)),
+                leafFilterNode => relaxFilterFunc(leafFilterNode.Filter)))
                 .Collapse();
     }
 }
