@@ -25,15 +25,19 @@ namespace ExtremeAndy.CombinatoryFilters
             Func<TFilter, Task<IFilterNode<TFilter>>> relaxFilterFunc,
             Func<TFilter, Task<IFilterNode<TFilter>>> restrictFilterFunc)
             where TFilter : IFilter
-            => (await filter.Match<Task<IFilterNode<TFilter>>>(
+        {
+            var result = await filter.Match<Task<IFilterNode<TFilter>>>(
                 async combinationFilterNode =>
                 {
                     var innerFilterNodeTasks = combinationFilterNode.Nodes.Select(f => RelaxAsync(f, relaxFilterFunc, restrictFilterFunc));
-                    var innerFilterNodes = await Task.WhenAll(innerFilterNodeTasks);
+                    var innerFilterNodes = await Task.WhenAll(innerFilterNodeTasks).ConfigureAwait(false);
                     return new CombinationFilterNode<TFilter>(innerFilterNodes, combinationFilterNode.Operator);
                 },
-                async invertedFilterNode => new InvertedFilterNode<TFilter>(await RestrictAsync(invertedFilterNode.NodeToInvert, restrictFilterFunc, relaxFilterFunc)),
-                leafFilterNode => relaxFilterFunc(leafFilterNode.Filter)))
-                .Collapse();
+                async invertedFilterNode => new InvertedFilterNode<TFilter>(await RestrictAsync(invertedFilterNode.NodeToInvert, restrictFilterFunc, relaxFilterFunc).ConfigureAwait(false)),
+                leafFilterNode => relaxFilterFunc(leafFilterNode.Filter))
+                .ConfigureAwait(false);
+
+            return result.Collapse();
+        }
     }
 }

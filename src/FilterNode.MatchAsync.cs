@@ -18,7 +18,7 @@ namespace ExtremeAndy.CombinatoryFilters
                 case IInvertedFilterNode<TFilter> invertedNode:
                     return invert(invertedNode);
                 case ILeafFilterNode<TFilter> leafNode:
-                    return await transform(leafNode);
+                    return await transform(leafNode).ConfigureAwait(false);
                 default:
                     throw new InvalidOperationException($"Unhandled {nameof(node)} of type: {node.GetType()}");
             }
@@ -33,11 +33,11 @@ namespace ExtremeAndy.CombinatoryFilters
             switch (filter)
             {
                 case ICombinationFilterNode<TFilter> combinationFilter:
-                    return await combine(combinationFilter);
+                    return await combine(combinationFilter).ConfigureAwait(false);
                 case IInvertedFilterNode<TFilter> invertedFilter:
-                    return await invert(invertedFilter);
+                    return await invert(invertedFilter).ConfigureAwait(false);
                 case ILeafFilterNode<TFilter> leafFilter:
-                    return await transform(leafFilter);
+                    return await transform(leafFilter).ConfigureAwait(false);
                 default:
                     throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
             }

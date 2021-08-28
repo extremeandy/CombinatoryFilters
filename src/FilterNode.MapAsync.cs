@@ -16,13 +16,13 @@ namespace ExtremeAndy.CombinatoryFilters
             {
                 case ICombinationFilterNode<TFilter> combinationFilter:
                     var innerNodesTasks = combinationFilter.Nodes.Select(f => f.MapAsync(mapFunc));
-                    var innerNodes = await Task.WhenAll(innerNodesTasks);
+                    var innerNodes = await Task.WhenAll(innerNodesTasks).ConfigureAwait(false);
                     return new CombinationFilterNode<TResultFilter>(innerNodes, combinationFilter.Operator);
                 case IInvertedFilterNode<TFilter> invertedFilter:
-                    var innerNodeToInvert = await invertedFilter.NodeToInvert.MapAsync(mapFunc);
+                    var innerNodeToInvert = await invertedFilter.NodeToInvert.MapAsync(mapFunc).ConfigureAwait(false);
                     return new InvertedFilterNode<TResultFilter>(innerNodeToInvert);
                 case ILeafFilterNode<TFilter> leafFilter:
-                    return (await mapFunc(leafFilter.Filter)).ToLeafFilterNode();
+                    return (await mapFunc(leafFilter.Filter).ConfigureAwait(false)).ToLeafFilterNode();
                 default:
                     throw new InvalidOperationException($"Unhandled {nameof(filter)} of type: {filter.GetType()}");
             }
