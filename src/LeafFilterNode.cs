@@ -6,16 +6,9 @@ namespace ExtremeAndy.CombinatoryFilters
     public sealed class LeafFilterNode<TFilter> : FilterNode<TFilter>, ILeafFilterNode<TFilter>
         where TFilter : IFilter
     {
-        private readonly Lazy<bool> _isTrue;
-        private readonly Lazy<bool> _isFalse;
-        private readonly Lazy<int> _hashCode;
-
         public LeafFilterNode(TFilter filter)
         {
             Filter = filter;
-            _isTrue = new Lazy<bool>(filter.IsTrue);
-            _isFalse = new Lazy<bool>(filter.IsFalse);
-            _hashCode = new Lazy<int>(filter.GetHashCode);
         }
 
         public TFilter Filter { get; }
@@ -49,12 +42,12 @@ namespace ExtremeAndy.CombinatoryFilters
 
         public override IFilterNode<TFilter> Collapse()
         {
-            if (_isTrue.Value)
+            if (IsTrue())
             {
                 return True;
             }
 
-            if (_isFalse.Value)
+            if (IsFalse())
             {
                 return False;
             }
@@ -71,9 +64,9 @@ namespace ExtremeAndy.CombinatoryFilters
         protected override bool IsEquivalentToInternal(IFilterNode other)
             => Equals(other);
 
-        public override bool IsTrue() => _isTrue.Value;
+        protected override bool IsTrueInternal() => Filter.IsTrue();
 
-        public override bool IsFalse() => _isFalse.Value;
+        protected override bool IsFalseInternal() => Filter.IsFalse();
 
         public override bool Equals(IFilterNode other)
         {
@@ -86,7 +79,7 @@ namespace ExtremeAndy.CombinatoryFilters
                    && Filter.Equals(leafOther.Filter);
         }
 
-        public override int GetHashCode() => _hashCode.Value;
+        protected override int GetHashCodeInternal() => Filter.GetHashCode();
 
         public override string ToString() => Filter.ToString();
     }

@@ -112,9 +112,9 @@ namespace ExtremeAndy.CombinatoryFilters
             => other is IInvertedFilterNode invertedOther
                && NodeToInvert.Equals(invertedOther.NodeToInvert);
 
-        public override bool IsTrue() => NodeToInvert.IsFalse();
+        protected override bool IsTrueInternal() => NodeToInvert.IsFalse();
 
-        public override bool IsFalse() => NodeToInvert.IsTrue();
+        protected override bool IsFalseInternal() => NodeToInvert.IsTrue();
 
         public override bool Equals(IFilterNode other)
         {
@@ -127,7 +127,7 @@ namespace ExtremeAndy.CombinatoryFilters
                    && NodeToInvert.Equals(invertedOther.NodeToInvert);
         }
 
-        public override int GetHashCode()
+        protected override int GetHashCodeInternal()
         {
             unchecked
             {

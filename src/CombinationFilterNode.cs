@@ -12,8 +12,7 @@ namespace ExtremeAndy.CombinatoryFilters
         /// </summary>
         private readonly IComparer<IFilterNode<TFilter>> _comparer;
         internal readonly IFilterNode<TFilter>[] Nodes;
-        private readonly Lazy<int> _hashCode;
-        private readonly Lazy<HashSet<IFilterNode>> _nodesSet;
+        private readonly SimpleLazy<HashSet<IFilterNode>> _nodesSet;
 
         public CombinationFilterNode(IEnumerable<TFilter> filters, CombinationOperator @operator = default)
             : this(filters.Select(f => f.ToLeafFilterNode()), @operator, isCollapsed: false, comparer: null)
@@ -35,20 +34,8 @@ namespace ExtremeAndy.CombinatoryFilters
             IsCollapsed = isCollapsed;
             Nodes = nodes;
             Operator = @operator;
-            _nodesSet = new Lazy<HashSet<IFilterNode>>(() => new HashSet<IFilterNode>(nodes));
+            _nodesSet = new SimpleLazy<HashSet<IFilterNode>>(() => new HashSet<IFilterNode>(nodes));
             _comparer = comparer;
-
-            _hashCode = new Lazy<int>(() =>
-            {
-                var hashCode = 0;
-                for (var i = 0; i < nodes.Length; i++)
-                {
-                    hashCode = (hashCode * 397) ^ nodes[i].GetHashCode();
-                }
-
-                hashCode = (hashCode * 397) ^ Operator.GetHashCode();
-                return hashCode;
-            });
         }
 
         public override bool IsCollapsed { get; }
@@ -247,12 +234,12 @@ namespace ExtremeAndy.CombinatoryFilters
                && Operator == combinationOther.Operator
                && _nodesSet.Value.SetEquals(combinationOther.Nodes);
 
-        public override bool IsTrue()
+        protected override bool IsTrueInternal()
             => Operator.Match(
                 () => Nodes.All(f => f.IsTrue()),
                 () => Nodes.Any(f => f.IsTrue()));
 
-        public override bool IsFalse()
+        protected override bool IsFalseInternal()
             => Operator.Match(
                 () => Nodes.Any(f => f.IsFalse()),
                 () => Nodes.All(f => f.IsFalse()));
@@ -273,7 +260,20 @@ namespace ExtremeAndy.CombinatoryFilters
             return Nodes.SequenceEqual(combinationOther.Nodes);
         }
 
-        public override int GetHashCode() => _hashCode.Value;
+        protected override int GetHashCodeInternal()
+        {
+            unchecked
+            {
+                var hashCode = 0;
+                for (var i = 0; i < Nodes.Length; i++)
+                {
+                    hashCode = (hashCode * 397) ^ Nodes[i].GetHashCode();
+                }
+
+                hashCode = (hashCode * 397) ^ Operator.GetHashCode();
+                return hashCode;
+            }
+        }
 
         public override string ToString()
         {

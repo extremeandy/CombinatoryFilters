@@ -6,6 +6,10 @@ namespace ExtremeAndy.CombinatoryFilters
     public abstract class FilterNode<TFilter> : IFilterNode<TFilter>
         where TFilter : IFilter
     {
+        private readonly SimpleLazy<int> _hashCode;
+        private readonly SimpleLazy<bool> _isTrue;
+        private readonly SimpleLazy<bool> _isFalse;
+
         /// <summary>
         /// Empty filter which is the equivalent of 'true'
         /// </summary>
@@ -15,6 +19,13 @@ namespace ExtremeAndy.CombinatoryFilters
         /// Empty filter which is the equivalent of 'false'
         /// </summary>
         public static readonly CombinationFilterNode<TFilter> False = new CombinationFilterNode<TFilter>(Array.Empty<IFilterNode<TFilter>>(), CombinationOperator.Any, isCollapsed: true, comparer: FilterNodeComparer<TFilter>.Default);
+
+        protected FilterNode()
+        {
+            _hashCode = new SimpleLazy<int>(GetHashCodeInternal);
+            _isTrue = new SimpleLazy<bool>(IsTrueInternal);
+            _isFalse = new SimpleLazy<bool>(IsFalseInternal);
+        }
 
         public abstract TResult Aggregate<TResult>(
             Func<TResult[], CombinationOperator, TResult> combine,
@@ -63,9 +74,9 @@ namespace ExtremeAndy.CombinatoryFilters
         /// <returns></returns>
         protected abstract bool IsEquivalentToInternal(IFilterNode other);
 
-        public abstract bool IsTrue();
+        public bool IsTrue() => _isTrue.Value;
 
-        public abstract bool IsFalse();
+        public bool IsFalse() => _isFalse.Value;
 
         public abstract bool Equals(IFilterNode other);
 
@@ -79,8 +90,14 @@ namespace ExtremeAndy.CombinatoryFilters
             return obj is IFilterNode other && Equals(other);
         }
 
-        public abstract override int GetHashCode();
-        
+        public override int GetHashCode() => _hashCode.Value;
+
+        protected abstract int GetHashCodeInternal();
+
+        protected abstract bool IsTrueInternal();
+
+        protected abstract bool IsFalseInternal();
+
         public abstract bool IsCollapsed { get; }
     }
 }
