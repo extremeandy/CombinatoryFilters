@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project (will try to) adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.1.0
+
+### Added
+
+- Added `FilterNode.Combine` extension method
+
 ## 4.0.0
 
 Some major changes took place in this release to simplify things that were just way too complicated. Previously, leaf nodes were actually filters, i.e. they inherited from `ILeafFilterNode` and *also* implemented the filter logic.
