@@ -20,7 +20,7 @@ namespace ExtremeAndy.CombinatoryFilters.Tests
             {
                 (
                     // 'A' should precede 'B'
-                    FilterNode: new CombinationFilterNode<CharFilter>(new[] {  new CharFilter('A'), new CharFilter('B'), new CharFilter('A') }),
+                    FilterNode: new CombinationFilterNode<CharFilter>(new[] { new CharFilter('A'), new CharFilter('B'), new CharFilter('A') }),
                     ExpectedResult: new CombinationFilterNode<CharFilter>(new[] { new CharFilter('A'), new CharFilter('A'), new CharFilter('B') })
                 ),
                 (

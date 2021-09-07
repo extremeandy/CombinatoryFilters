@@ -49,16 +49,10 @@ namespace ExtremeAndy.CombinatoryFilters
             => invert(this);
 
         public override IFilterNode<TResultFilter> Map<TResultFilter>(Func<TFilter, TResultFilter> mapFunc)
-        {
-            var innerNode = NodeToInvert.Map(mapFunc);
-            return new InvertedFilterNode<TResultFilter>(innerNode);
-        }
+            => NodeToInvert.Map(mapFunc).Invert();
 
         public override IFilterNode<TResultFilter> Bind<TResultFilter>(Func<TFilter, IFilterNode<TResultFilter>> bindFunc)
-        {
-            var innerNode = NodeToInvert.Bind(bindFunc);
-            return new InvertedFilterNode<TResultFilter>(innerNode);
-        }
+            => NodeToInvert.Bind(bindFunc).Invert();
 
         public override IFilterNode<TFilter> Sort(IComparer<IFilterNode<TFilter>> comparer)
         {

@@ -31,9 +31,9 @@ namespace ExtremeAndy.CombinatoryFilters
                 {
                     var innerFilterNodeTasks = combinationFilterNode.Nodes.Select(f => RelaxAsync(f, relaxFilterFunc, restrictFilterFunc));
                     var innerFilterNodes = await Task.WhenAll(innerFilterNodeTasks).ConfigureAwait(false);
-                    return new CombinationFilterNode<TFilter>(innerFilterNodes, combinationFilterNode.Operator);
+                    return innerFilterNodes.Combine(combinationFilterNode.Operator);
                 },
-                async invertedFilterNode => new InvertedFilterNode<TFilter>(await RestrictAsync(invertedFilterNode.NodeToInvert, restrictFilterFunc, relaxFilterFunc).ConfigureAwait(false)),
+                async invertedFilterNode => (await RestrictAsync(invertedFilterNode.NodeToInvert, restrictFilterFunc, relaxFilterFunc).ConfigureAwait(false)).Invert(),
                 leafFilterNode => relaxFilterFunc(leafFilterNode.Filter))
                 .ConfigureAwait(false);
 

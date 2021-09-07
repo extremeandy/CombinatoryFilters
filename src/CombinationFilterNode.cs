@@ -66,16 +66,10 @@ namespace ExtremeAndy.CombinatoryFilters
             => combine(this);
 
         public override IFilterNode<TResultFilter> Map<TResultFilter>(Func<TFilter, TResultFilter> mapFunc)
-        {
-            var innerNodes = Nodes.Select(f => f.Map(mapFunc));
-            return new CombinationFilterNode<TResultFilter>(innerNodes, Operator);
-        }
+            => Nodes.Select(f => f.Map(mapFunc)).Combine(Operator);
 
         public override IFilterNode<TResultFilter> Bind<TResultFilter>(Func<TFilter, IFilterNode<TResultFilter>> bindFunc)
-        {
-            var innerNodes = Nodes.Select(f => f.Bind(bindFunc));
-            return new CombinationFilterNode<TResultFilter>(innerNodes, Operator);
-        }
+            => Nodes.Select(f => f.Bind(bindFunc)).Combine(Operator);
 
         public override IFilterNode<TFilter> Sort(IComparer<IFilterNode<TFilter>> comparer)
         {

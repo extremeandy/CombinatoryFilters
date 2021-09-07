@@ -23,5 +23,16 @@ namespace ExtremeAndy.CombinatoryFilters
                 ? filterNodesArray[0]
                 : new CombinationFilterNode<TFilter>(filterNodesArray, @operator, isCollapsed: false, comparer: null);
         }
+
+        /// <summary>
+        /// Combines the supplied <see cref="IFilterNode" />s into a <see cref="ICombinationFilterNode"/>,
+        /// or returns the node if there is only a single one.
+        /// </summary>
+        /// <typeparam name="TFilter"></typeparam>
+        public static IFilterNode<TFilter> Combine<TFilter>(
+            this IEnumerable<TFilter> filters,
+            CombinationOperator @operator = default)
+            where TFilter : IFilter
+            => filters.Select(filter => filter.ToLeafFilterNode()).Combine(@operator);
     }
 }
